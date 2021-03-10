@@ -1,0 +1,2 @@
+counts <- read.csv("./02_run-reconstruction/data/borderCounts.csv")
+load("./02_run-reconstruction/data/chinookYkData.Rdata")
