@@ -9,17 +9,9 @@ Data and code to:
 Project made possible by grant 1701 from the Arctic-Yukon-Kuskokwim Sustainable Salmon Initiative
 
 ## Folders and files
-- `01_inputs`: Data neccessaryu to reprouce all figures in manuscripts
-- `figures.R`: Generate figures in manuscript
-- 
--  `load.R`: Loads packages and scripts necessary for analysis. This file should be sourced prior to running other scripts.
+- `01_inputs`: Data and model output to reproduce all figures in manuscripts
+- `02_run-reconstruction`: Code and data to fit the multi-stock run-reconstructions
+- `03_SRA`: Placehoder for SRA files? 
+- `04_figures`: Code to generate manuscript figures 
+- `load.R`: Loads packages and scripts necessary for analysis. This file should be sourced prior to running other scripts.
 
-- `functions.R`: All functions written for the analysis should be placed in this file.
-  
-- `close_loop_sims.R`: Run closed loop forwad simulations.
-
-
-  
-- `simulation_summary.Rmd`: R Markdown doc that summarizes simulations, and generates figures for manuscript (in `images` folder)
-
-- `appendix_A.R`: R Markdown doc that details the stationary Ricker to time-varying Beverton-Holt formulation we used, and simulations to justify its parameterization in our closed-loop simulations. 
