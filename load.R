@@ -2,7 +2,7 @@
 # Load functions and libraries for analysis and plotting
 #------------------------------------------------------------------------------#
 
-source("functions.R") 
+source("./04_figures/functions.R") 
 
 library(tidyverse)
 library(purrr)

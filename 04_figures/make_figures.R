@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------------------- #
-# figures.R
+# make_figures.R
 #
 # Manuscript figures
 # ------------------------------------------------------------------------------------- #
@@ -11,7 +11,7 @@ ASL <- read.csv("01_inputs/data/ASL_GSI_modified.csv") # ASL data
 jtc <- read.csv("01_inputs/data/jtc_age_and_harvest_data.csv") # aggregate JTC age comp data and CDN harvest rate
 ensemble <- read.csv("./02_run-reconstruction/rr_outputs/ensemble.csv") # ensemble run-reconstruction output
 RR <-load("./02_run-reconstruction/rr_outputs/rpt.fullCor.Rdata") # fully estimated var-covar run-reconstruction model output
-SSSR <- readRDS("./03_outputs/posteriors/27-Oct-2020_SS-SRA-posteriors-10k-unifBeta-scenEnsble.RDS") # posterior samples from SS-SRA models
+SSSR <- readRDS("./01_inputs/posteriors/27-Oct-2020_SS-SRA-posteriors-10k-unifBeta-scenEnsble.RDS") # posterior samples from SS-SRA models
 
 # pre-process data ----
 pop_colors <- viridis(8)
@@ -405,7 +405,7 @@ g <- ggplot() +
   geom_text(data = a, 
             mapping = aes(x = 237, y = -0.5, label = year_count, hjust = 1, vjust = 2),
             size=3, color = "red")
-jpeg("03_outputs/figures/figure3.jpeg", width = 6, height = 8, units = "in", res = 600)
+jpeg("04_figures/figures/figure3.jpeg", width = 6, height = 8, units = "in", res = 600)
 print(g)
 dev.off()
 
@@ -423,7 +423,7 @@ y_h <- cbind(geo_stk_num ,seq(0.1,0.8,length.out=8), pop_col_order, stks)
 y_h_2 <- y_h[order(y_h[,1]),]
 
 
-jpeg("03_outputs/figures/figure4.jpg",width=5.5, height=4,units="in",res=400,bg = "transparent")
+jpeg("04_figures/figures/figure4.jpg",width=5.5, height=4,units="in",res=400,bg = "transparent")
 
   par(mfrow=c(1,1), mar=c(2,1,1,1), oma=c(2,2,0,0) )
   plot(x=c(175,270), y=c(0.1,0.9), type="n", yaxt="n",las=1 , xaxt="n")
@@ -468,7 +468,7 @@ b <- ggplot(ensemble, aes(x = as.factor(year), y = med, fill = pops_f)) +
           theme(axis.title = element_text(size=10))+
           theme(legend.position = "none")
 
-jpeg("03_outputs/figures/figure5.jpg", width = 6, height = 6, units = "in", res = 600)
+jpeg("04_figures/figures/figure5.jpg", width = 6, height = 6, units = "in", res = 600)
 print(b)
 dev.off()
 
@@ -486,7 +486,7 @@ b <- ggcorrplot(run_corr_2, type = "upper",
                 lab_size = 2.4,
                 tl.cex = 8) 
 
-jpeg("03_outputs/figures/figure6.jpg", width = 3, height = 3, units = "in", res = 600)
+jpeg("04_figures/figures/figure6.jpg", width = 3, height = 3, units = "in", res = 600)
 print(b)
 dev.off()
 
@@ -561,13 +561,13 @@ g <- ggplot(data2, aes(x=year, y=age_prop, fill=Fish.Age)) +
       panel.grid.minor = element_blank())
 
 
-jpeg("03_outputs/figures/figure7.jpeg", width = 6, height = 5, units = "in", res = 200)
+jpeg("04_figures/figures/figure7.jpeg", width = 6, height = 5, units = "in", res = 200)
 print(g)
 dev.off()
 
 # Figure 8: Multi-panel SR and trade-offs
 
-source("tradeoffs.R")
+source("./04_figures/tradeoffs.R")
 
 # Figure 8: spawner-recruit ----
 
@@ -658,7 +658,7 @@ c <- ggplot(t3.3, aes(x=U*100, y=med_V2)) +
 g <- ggarrange(a,ggarrange(b,c,nrow =2, labels = c("b", "c")),
                ncol = 2, labels = c("a"))
 
-jpeg("./03_outputs/figures/figure8.jpeg", width = 6, height = 6, units = "in", res = 600)
+jpeg("./04_figures/figures/figure8.jpeg", width = 6, height = 6, units = "in", res = 600)
 print(g)
 dev.off()
 
@@ -732,7 +732,7 @@ c <- ggplot(data = phis.long, aes(x = pop, y = phi, fill=pop)) +
 g <- ggarrange(a,ggarrange(b,c,nrow =2, labels = c("b", "c")),
                ncol = 2, labels = c("a"))
 
-jpeg("./03_outputs/figures/figure9.jpeg", width = 6, height = 5, units = "in", res = 600)
+jpeg("./04_figures/figures/figure9.jpeg", width = 6, height = 5, units = "in", res = 600)
 print(g)
 dev.off()
 
@@ -841,6 +841,6 @@ b <- ggplot(data = rt_cvs, aes(x = Year, y = CV, color=Location)) +
 
 g <- ggarrange(a,b, labels = c("a", "b"),widths = c(1.3, 1), ncol = 2)
 
-jpeg("./03_outputs/figures/figure10.jpeg", width = 6, height = 2.5, units = "in", res = 600)
+jpeg("./04_figures/figures/figure10.jpeg", width = 6, height = 2.5, units = "in", res = 600)
 print(g)
 dev.off()
