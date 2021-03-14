@@ -621,7 +621,8 @@ b <- ggplot(data = alpha_beta_per, aes(x = equil_med, y = alpha_med, fill=popula
                   nudge_y=c(0,0,0,0,0,0,0,0),
                   size=2)
 
-source("tradeoffs.R")
+source("./04_figures/tradeoffs.R")
+
 c <- ggplot(t3.3, aes(x=U*100, y=med_V2)) +
   geom_line(linetype = "solid", size=0.5) +
   geom_ribbon(aes(ymin=low_V2, ymax=upp_V2), alpha=0.2, lty=1) +
