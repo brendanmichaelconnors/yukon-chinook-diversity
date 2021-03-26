@@ -1,0 +1,96 @@
+---
+editor_options: 
+  markdown: 
+    wrap: sentence
+---
+
+## Model Structure
+
+To characterize Chinook salmon population diversity we fit individual age-structured state-space spawner-recruitment models [@fleischman-etal-2013] to all available data for each population (i.e., time series of estimated catch, spawner abundance and age composition).
+These sources of information, along with measures of observation variance, were externally derived from the multi-population run-reconstructions described in Supplement A for spawner abundance and published estimates for catch and age composition.
+An alternative approach would have been to integrate the run-reconstructions and spawner-recruitment analyses into a single model.
+However, we note that previous research found that as long as the spawner-recruitment model carries forward uncertainty in input estimates from the run-reconstruction models, sequential analyses like those that we conducted produce very similar estimates of abundance, population dynamics parameters, and management reference points, both in terms of point estimates and uncertainty [@staton-etal-2017].
+Because the same model was fitted to each population, all symbols in the presentation of the state-space model actually have a $j$ subscript appended to them to represent individual populations.
+We omit this for the presentation here, both to simplify it and to emphasize that this approach fits to data from each population separately.
+
+### Process model
+
+The process model is intended to represent the true population dynamics (i.e.,free of measurement error).
+This component of our state-space spawner-recruitment model specifies productivity, density-dependence, and age-at-maturity by cohort (i.e. brood year, $y$).
+Recruitment abundances of adult Chinook ($R$) from 1985 to 2019 were treated as unobserved states and modeled as a function of spawner abundance ($S$) assuming a @ricker-1954 spawner-recruitment relationship with serially auto-correlated log-normal process variation:
+
+\begin{equation}
+\ln(R_y) = \ln(S_y) + \ln(\alpha) - \beta S_y + v_y
+(\#eq:ricker)
+\end{equation}
+
+where $\alpha$ is productivity (intrinsic rate of growth), $\beta$ is the magnitude of within brood-year density-dependent effects and $v$ reflects inter-annual variation in survival from egg to adulthood.
+This variation was assumed to be correlated with lag-1 ($\phi$) over time:
+
+\begin{equation}
+\begin{aligned}
+v_y &= \phi v_{y-1} + \varepsilon_y \\
+\varepsilon_y &\sim \mathcal{N}(0, \sigma_R)
+\end{aligned}
+(\#eq:residuals)
+\end{equation}
+
+where $\varepsilon_y$ reflects the portion of the survival anomaly $v_y$ that is temporally independent (white noise).
+The first seven years of observed returns that were not linked to observations of spawner abundance in the spawner-recruitment relationship (eqn. \@ref(eq:ricker)) were modeled as random draws from a log-normal distribution with mean $\ln(R_0)$ and variance $\sigma_R^2$.
+Rather than estimating $\ln(R_0)$) as a free parameter as in @fleischman-etal-2013, we choose to follow @staton-etal-2020 and inform its value using the expected recruitment under equilibrium unfished conditions $\ln(\alpha)/\beta$ to enable more consistent comparisons between the two approaches we used.
+The number of Chinook salmon that returned to spawn in year $y$ and age $a$ ($a \in$ 4:7) was the product of the total return in year $y-a$ and the proportion of fish from brood year $y-a$ that returned at age $a$:
+
+\begin{equation}
+N_{y,a} = R_{y-a,a} p_{y-a,a}
+(\#eq:apportion-R)
+\end{equation}
+
+where $p_{y,a}$ is the probability a fish spawned in brood year $y$ will mature at age $a$.
+We modeled brood year variation in maturity schedules as Dirichlet random vectors drawn form a common hyperdistribution characterized by a mean maturation-at-age probability vector ($\boldsymbol{\pi}$) and an inverse dispersion parameter ($D$):
+
+\begin{equation}
+p_{y,a} \stackrel{\mathrm{iid}}{\sim} \mathcal{D}(\boldsymbol{\pi}D)
+(\#eq:dirichlet)
+\end{equation}
+
+Lastly, harvest in a given year ($H$) was modeled as the product of total run size and the harvest rate ($U$) experienced:
+
+\begin{equation}
+H_y = N_y U_y
+(\#eq:harvest)
+\end{equation}
+
+### Observation model
+
+We assumed a coefficient of variation (CV) for spawner observations that was based on the CV in estimated spawner abundances derived from the run reconstruction.
+Observed spawner abundance was therefore assumed to be log-normally distributed with the CVs converted to log-normal variance following [@forbes-etal-2011]:
+
+\begin{equation}
+\sigma^2_{o,y} = \ln\left(\mathrm{CV}_y^2 + 1\right)
+(\#eq:get-sigma)
+\end{equation}
+
+We assumed that harvest had a 15% CV and so harvest observations were log-normally distributed with the CV converted to log-normal variance as per eqn.
+\@ref(eq:get-sigma).
+
+Age composition by return year was assumed to be observed with multinomial sampling error, where uncertainty in age proportions in a given year was generated by specifying an "effective sample size" (ESS) of 100.
+An ESS equal to 100 is the multinomial sample size expected to produce uncertainty roughly equivalent to that which would be anticipated from the average number of fish sampled in a given year from a population with age proportions and classes similar to that of the aggregate population.
+
+### Model fitting
+
+We fit the model described in equations \@ref(eq:ricker) through \@ref(eq:harvest) in a Bayesian estimation framework. The model was parameterized with the harvest rate ($U_{\mathrm{MSY}}$) and spawner abundance ($S_{\mathrm{MSY}}$) predicted to maximize long-term sustainable yield as leading parameters from which productivity ($\alpha = e^{U_{\mathrm{MSY}}}⁄(1-U_{\mathrm{MSY}})$) and magnitude of within brood-year density dependent effects ($\beta=U_{\mathrm{MSY}}⁄S_{\mathrm{MSY}}$) were calculated [@schnute-kronlund-2002]. Prior probabilities for most unknowns in the model were specified so as to be uninformative and joint posterior probability distributions for all unknowns in the model were generated using a Markov chain Monte Carlo (MCMC) procedure in the JAGS sampler (v4.3.0) interfaced through R [@plummer-2003]. See the JAGS model code below for the priors used on all parameters and the structure of the data. We ran five chains for 40,000 iterations after a burn-in of 10,000, and retained every 20th iteration. Convergence was assessed by examining the potential scale reduction factor ($\hat{R}$), which compares within-chain variance to between-chain variance to diagnose convergence, and assumed to have occurred if $\hat{R}$ was less than 1.1 [@brooks-gelman-1998].
+
+### JAGS Model Code
+
+```{r}
+mod_file = "SS-SS-SRA-JAGS-bas-edits.txt"
+mod = readLines(mod_file)
+
+fline = which(mod == "model {")
+lline = which(mod == "}")
+model_code = mod[fline:lline]
+
+# detailed_code = paste("<details>", "<summary>View Single-Population JAGS Code</summary>", model_code, "</details>", collapse = "\n")
+```
+
+`r details::details(model_code, summary = "View Code")`

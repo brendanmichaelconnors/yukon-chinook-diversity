@@ -1,0 +1,29 @@
+---
+bibliography: references.bib
+---
+
+## Summary of Method Comparisons
+
+Key conclusions that can be drawn from comparing the alternative spawner-recruitment models are listed below. The figures that display these results can be found by exploring the drop down menu in [Alternative Method Results](#int-results).
+
+-   The integrated model suggested the populations were on average less productive than the separated approach.
+
+-   The integrated model suggested a "flatter" relationship between population productivity and size.
+
+-   The integrated model suggested higher recruitment variability and lower recruitment synchrony among populations.
+
+-   Spawner-recruit relationships were generally more certain for the integrated approach than the separated approach.
+
+-   The integrated model approach suggested smaller aggregate population values of $U_{\mathrm{MSY}}$ and MSY, but similar $S_{\mathrm{MSY}}$ and proportion of populations that would be as risk of overfishing or extirpation when fished at MSY.
+
+## Selection of the Base Method for the Main Text
+
+Rather than present inferences from both approaches in the main text, we decided to focus on one, and detail a comparison here in the supplement. Due to a general lack of robust simulation testing of state-space spawner-recruitment models, the literature does not provide much guidance on why we should view one approach as inherently "better" than the other. Both approaches have been simulation tested under highly limited conditions. The presentation of the integrated model was accompanied by a simulation evaluation in @staton-etal-2020, and was found to return largely unbiased estimates of key parameters of interest. @su-peterman-2012 performed a detailed simulation analysis testing the performance of state-space spawner-recruitment models, but none of their models were age-structured and they were for single-population applications. @staton-etal-2017 simulation tested an age-structured single-population state-space spawner-recruitment model, but again under highly limited conditions. Each of these studies illustrated benefits of state-space models over simpler non-time series methods that did not account for measurement error, but none of them shed light on which state-space approach is most appropriate for our application. Given the increasing interest in fitting multiple populations simultaneously with one state-space model [e.g., @reimer-decovich-2020], we suggest that future simulation studies be directed at providing analysts with guidance regarding how to structure these models in the future.
+
+We decided to present results of the separated model approach in the main text for the following reasons:
+
+-   **Wider application:** the single-population state-space spawner-recruitment model of @fleischman-etal-2013 has seen much broader application than the integrated model of @staton-etal-2020. Although this is (to our knowledge) the first time this model has been used in a mixed-stock context, the broader application of the single population model gives us greater confidence in drawing inferences from it rather than the integrated approach.
+
+-   **More sensible estimates of recruitment variability:** the integrated model returned some very high estimates of recruitment variability and negative estimates of recruitment autocorrelation. Generally, we should expect the autocorrelation to be positive (good years followed by good years, poor years followed by poor years) as is commonly observed in other salmon populations and are concerned at the negative estimates provided by the integrated model. Further, the recruitment variability estimates appear to be spuriously too high, which could lead to biases in other model parameters in manners that are difficult to predict.
+
+-   **Lack of sensitivity of our conclusions to this choice:** regardless of the approach we selected here, the conclusions we make about the benefits of maintaining population biodiversity would not change.

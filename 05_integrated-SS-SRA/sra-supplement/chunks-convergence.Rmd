@@ -1,0 +1,113 @@
+
+### MCMC Details {.tabset .tabset-pills}
+
+`r mcmc_statement`
+
+#### Convergence Summaries {.tabset .tabset-pills}
+
+##### $\hat{R}$ values
+
+This table shows summaries of the $\hat{R}$ convergence diagnostic for key parameters/states across populations and years, where applicable.
+
+```{r}
+main_p = c("alpha", "beta", "U_msy", "S_msy", "sigma_R", "pi", "^U[", "phi", "^R[", "^S[", "D_sum")
+
+
+tmp_summ = function(z, na.rm = F) {
+  c(Mean = mean(z, na.rm = na.rm),
+    Median = median(z, na.rm = na.rm),
+    Min = min(z, na.rm = na.rm),
+    Max = max(z, na.rm = na.rm)
+    )
+}
+
+diags = post_summ(post, main_p, Rhat = T, neff = T)[c("Rhat", "neff"),]
+all_p = colnames(diags)
+diags = sapply(main_p, function(x) {
+  list(diags[,stringr::str_detect(all_p, postpack:::ins_regex_bracket(x))])
+})
+
+Rhat = t(as.data.frame(lapply(diags, function(x) {
+  if (is.matrix(x)) {
+    tmp_summ(x["Rhat",], na.rm = T)
+  } else {
+    tmp_summ(x["Rhat"], na.rm = T)
+  }
+})))
+ess = t(as.data.frame(lapply(diags, function(x) {
+  if (is.matrix(x)) {
+    tmp_summ(x["neff",], na.rm = T)
+  } else {
+    tmp_summ(x["neff"], na.rm = T)
+  }
+})))
+Rhat = apply(Rhat, 2, function(x) round(x, 2))
+ess = apply(ess, 2, function(x) prettyNum(round(x), big.mark = ","))
+
+ps = stringr::str_replace(rownames(Rhat), "X\\.", "")
+ps = stringr::str_replace(ps, "\\.", "")
+
+ps = ifelse(ps == "S_msy", "$S_{\\text{MSY},j}$", ps)
+ps = ifelse(ps == "U_msy", "$U_{\\text{MSY},j}$", ps)
+ps = ifelse(ps == "U", "$U_t$", ps)
+ps = ifelse(ps == "pi", "$\\pi_a$", ps)
+ps = ifelse(ps == "phi", "$\\phi$", ps)
+ps = ifelse(ps == "D_sum", "$D$", ps)
+ps = ifelse(ps %in% c("alpha", "beta"), paste("$\\", ps, "_j$", sep = ""), ps)
+ps = ifelse(ps == "sigma_R", "$\\sigma_{R,j}$", ps)
+ps = ifelse(ps == "R", "$R_{y,j}$", ps)
+ps = ifelse(ps == "S", "$S_{t,j}$", ps)
+
+# ps = paste("`", ps, "`", sep = "")
+Rhat = cbind(Parameter = ps, Rhat); rownames(Rhat) = NULL
+ess = cbind(Parameter = ps, ess); rownames(ess) = NULL
+
+kable(
+  Rhat, 
+  format = kable_format, escape = F) %>%
+  kable_styling(full_width = T)
+```
+
+##### Effective Samples
+
+This table shows summaries of the MCMC effective sample size diagnostic for key parameters/states across populations and years, where applicable.
+
+```{r}
+kable(
+  ess, 
+  format = kable_format, escape = F) %>%
+  kable_styling(full_width = T)
+```
+
+#### Convergence Plots {.tabset .tabset-pills}
+
+##### $U_{\text{MSY},j}$
+
+```{r fig.width = 6, fig.height = 7}
+diag_plots(post, "U_msy")
+```
+
+##### $S_{\text{MSY},j}$
+
+```{r fig.width = 6, fig.height = 7}
+diag_plots(post, "S_msy[")
+```
+
+##### $\sigma_{R,j}$
+
+```{r fig.width = 6, fig.height = 7}
+diag_plots(post, "sigma_R")
+```
+
+##### $\phi$
+
+```{r fig.width = 6, fig.height = 7}
+diag_plots(post, "phi")
+```
+
+##### $D$
+
+```{r fig.width = 6, fig.height = ifelse(length(match_params(post, "D_sum")) == 1, 3.5, 7)}
+diag_plots(post, "D_sum")
+```
+
