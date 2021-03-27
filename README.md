@@ -14,5 +14,6 @@ Project made possible by grant 1701 from the Arctic-Yukon-Kuskokwim Sustainable 
 - `02_run-reconstruction`: Code and data to fit the multi-stock run-reconstructions
 - `03_single-stock-SS-SRA`: Code to fit single stock state-space spawner-recruitment models 
 - `04_figures`: Code to generate manuscript figures 
+- `05_integrated-SS-SRA`: Code and data to fit a integrated population state-space spawner-recruit model and produce the content in Supplement B to the main-text
 - `load.R`: Loads packages and scripts necessary for analysis. This file should be sourced prior to running other scripts.
 

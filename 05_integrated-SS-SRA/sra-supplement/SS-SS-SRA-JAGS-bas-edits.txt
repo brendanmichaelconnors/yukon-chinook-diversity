@@ -1,0 +1,104 @@
+model {
+  # priors for SR portion
+  U.msy ~ dunif(0.01, 0.99)
+  lnS.msy ~ dnorm(0, 0.001) I(1,11.5)
+  S.msy <- exp(lnS.msy)
+  alpha <- exp(U.msy)/(1 - U.msy)
+  lnalpha <- log(alpha)
+  beta <- U.msy/S.msy
+  tau.R ~ dgamma(0.01,0.01)  # white noise process error
+  sigma.R <- 1 / sqrt(tau.R)
+  phi ~ dunif(-0.99, 0.99)   # autocorrelation coefficient                                              
+  log.resid.0 <- 0           # multi-stock model fixes this at zero
+  
+  # Ricker SR with AR1 process on log recruitment residuals for years with brood year spawners
+  for (y in (A+a.min):nRyrs) {
+    log.R[y] ~ dnorm(log.R.mean.2[y], tau.R)  # true state R is lognormally distributed around the prediction given by SR with AR1
+    R[y] <- exp(log.R[y])
+    log.R.mean.1[y] <- lnalpha + log(S[y-a.max]) - beta * S[y-a.max]
+    log.R.mean.2[y] <- log.R.mean.1[y] + phi * log.resid[y-1]
+    log.resid[y] <- log.R[y] - log.R.mean.1[y]
+  }             
+  
+  # First `a.max` years of recruits, for which there is no spawner link
+  # multi-stock model uses the same tau.R for this period as for the remaining years
+  mean.log.R0 <- log(lnalpha/beta)  # mean recruitment in these years is unfished eq.
+  # handle first brood year
+  log.R.mean.1[1] <- mean.log.R0
+  log.R.mean.2[1] <- log.R.mean1 + phi * log.resid.0
+  log.R[1] ~ dnorm(log.R.mean2[1], tau.R)
+  R[1] <- exp(log.R[1])
+  log.resid[1] <- log.R[1] - log.R.mean1[1]
+
+  # handle remaining brood years
+  for (y in 2:a.max) {
+    log.R[y] ~ dnorm(log.R.mean.2[y], tau.R)  
+    log.R.mean.1[y] <- mean.log.R0
+    log.R.mean.2[y] <- log.R.mean.1[y] + phi * log.resid[y-1]
+    log.resid[y] <- log.R[y] - log.R.mean.1[y]
+    R[y] <- exp(log.R[y])
+  }
+  
+  # biological reference points: derived quantities
+  # lnalpha.c <- lnalpha + (sigma.R * sigma.R)/2/(1-phi * phi)
+  # S.max <- 1/beta
+  # S.eq <- lnalpha.c * S.max
+  # S.msy <- S.eq * (0.5 - 0.07 * lnalpha.c)
+  # U.msy <- lnalpha.c * (0.5 - 0.07 * lnalpha.c)
+  
+  # Maturity schedule: here we use a common maturation schedule to draw the brood year specific schedules;
+  prob[1] ~ dbeta(1,1)
+  prob[2] ~ dbeta(1,1)
+  prob[3] ~ dbeta(1,1)
+  pi[1]<- prob[1]
+  pi[2] <- prob[2] * (1 - pi[1])
+  pi[3] <- prob[3] * (1 - pi[1] - pi[2])
+  pi[4] <- 1 - pi[1] - pi[2] - pi[3]
+  
+  D.scale ~ dunif(.045,1)
+  D.sum <- 1 / (D.scale * D.scale)
+  for (a in 1:A) {
+    gamma[a] <- D.sum * pi[a]
+    for (y in 1:(Y+A-1)) {                                                    
+      g[y,a] ~ dgamma(gamma[a],1.0)
+      p[y,a] <- g[y,a]/sum(g[y,])
+    }
+  }
+  
+  # Calculate the numbers at age matrix as brood year recruits at age (proportion that matured that year)
+  for (t in 1:Y) {
+    for(a in 1:A){
+      N.ta[t,a] <- R[t+A-a] * p[t+A-a,a]
+    }
+  }
+  
+  ## OBSERVATION SUBMODEL ##
+  # multinomial scale sampling
+  for (t in 1:Y) {
+    for (a in 1:A) {
+      q[t,a] <- N.ta[t,a]/N[t]
+    }
+    x[t,1:A] ~ dmulti(q[t,1:A], n[t])
+  }
+  
+  for (t in 1:Y) {
+    # get observation tau's from assumed CV's
+    log.sigma.C[t] <- sqrt(log((C.cv[t]^2) + 1))
+    log.tau.C[t] <- 1/log.sigma.C[t]^2
+    log.sigma.S[t] <- sqrt(log((S.cv[t]^2) + 1))
+    log.tau.S[t] <- 1/log.sigma.S[t]^2
+    
+    # catch model
+    U[t] ~ dunif(0.01, 0.99)
+    N[t] <- sum(N.ta[t,1:A])
+    S[t] <- N[t] * (1 - U[t])
+    
+    C[t] <- N[t] * U[t]
+    log.C[t] <- log(C[t])
+    C.obs[t] ~ dlnorm(log.C[t], log.tau.C[t])
+    
+    # escapement model
+    log.S[t] <- log(S[t])
+    S.obs[t] ~ dlnorm(log.S[t], log.tau.S[t])
+  }
+}

@@ -1,0 +1,61 @@
+---
+title: "Population diversity in Canadian-origin Chinook salmon: portfolio quantification and implications for conservation, harvest, equity, and resilience"
+subtitle: "SUPPLEMENT B"
+author: "B.M. Connors, M. R. Siegle, J. Harding, S. Rossi, B.A. Staton, M. Jones, M. Bradford, R. Browne, B. Bechtol, B. Doherty, S. Cox"
+output: 
+  bookdown::html_document2:
+  # bookdown::word_document2:
+    theme: cerulean
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    number_sections: false
+editor_options: 
+  chunk_output_type: console
+  markdown: 
+    wrap: sentence
+bibliography: references.bib
+csl: "https://raw.githubusercontent.com/citation-style-language/styles/master/canadian-journal-of-fisheries-and-aquatic-sciences.csl"
+link-citations: true
+always_allow_html: yes
+---
+
+```{r setup, include = F}
+# set chunk options
+knitr::opts_chunk$set(echo = F, message = F, warning = F, fig.align = "center", dpi = 250)
+kable_format = ifelse(knitr::is_html_output(), "html", "simple")
+```
+
+```{r my_par() function}
+my_par = function(mar = c(3,3,1,1), mgp = c(2,0.35,0), tcl = -0.15, ljoin = "mitre", lend = "square", ...) {
+  par(mar = mar, mgp = mgp, tcl = tcl, ljoin = ljoin, lend = lend, ...)
+}
+```
+
+This supplement provides a detailed description of the spawner-recruitment models that are briefly described in the main text and which were used to quantify Canadian origin Yukon Chinook population diversity (e.g., population specific spawner abundance, recruitment, productivity, capacity, covariation in survival, etc.) and resulting portfolio effects and mixed-stock fishery trade-offs. 
+
+# Primary Spawner-Recruitment Analysis: Population-Specific Models
+
+The approach described in this section fits a separate spawner-recruitment model to each population, and summarizes the resulting parameter estimates for primary inference.
+We also fitted a single multi-population spawner-recruitment model that estimates all population parameters simultaneously in an attempt to more realistically represent shared population dynamics and measurement processes, see the section [Alternative Method: Mixed-Population Model](#alt-ssm) for description and a comparison of approaches.
+
+```{r, eval = T, child = "description-separated.Rmd"}
+```
+
+```{r, eval = T, child = "results-separated.Rmd"}
+```
+
+# Alternative Method: Mixed-Population Model {#alt-ssm}
+
+```{r, eval = T, child = "description-integrated.Rmd"}
+```
+
+```{r, eval = T, child = "results-integrated.Rmd"}
+```
+
+# Conclusions
+
+```{r, eval = T, child = "discussion.Rmd"}
+```
+
+# References

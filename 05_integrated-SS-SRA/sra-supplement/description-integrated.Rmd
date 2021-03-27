@@ -1,0 +1,47 @@
+## Model Description {#alt-ssm-description}
+
+Rather than fitting eight population-specific models as we describe above, @staton-etal-2020 presented an alternative method for estimating mixed-stock spawner-recruitment relationships and we implemented a slightly modified version to serve as an alternative analysis for our case. We refer to these as the "separated" or "integrated" approaches to estimating the parameters of populations in the mixed-stock, respectively. The integrated approach, originally presented in the context of Kuskokwim River Chinook salmon, combines monitoring data across populations into a single model and estimates all parameters (both population-specific and those common all) simultaneously. The intent of such an integration is to enable modeling shared dynamics in the biological and measurement processes among populations, which can (a) help capture realism, (b) increase precision, and (c) aid in handling missing data which was pervasive in the Kuskokwim but is not in the current application to the Yukon.
+
+### Similarities between approaches
+
+1.  Both are age-structured state-space methods, where time linkages among years are captured in the spawner-recruitment dynamics, and both biological and observation variation are explicitly modeled.
+2.  Each population has uniquely estimated parameters $U_{\mathrm{MSY},j}$ (and hence $\alpha_j$), $S_{\mathrm{MSY},j}$ (and hence $\beta_j$), and $\phi_j$.
+3.  Each population has a specific $\sigma_R$.
+4.  The spawner abundance time series is fitted using one independent log-normal likelihood for each population.
+5.  Other equilibrium quantities (such as the aggregate spawner abundance expected to produce exactly equilibrium replacement recruitment, $S_{\mathrm{eq}}$) are calculated in an identical fashion from the parameters in item (2).
+
+### Differences between approaches
+
+The integrated approach we used had the following features that differed from those in the separated approach:
+
+1.  A dimension $j$ is added to nearly all quantities. E.g., $N_{y,a}$ from eqn. \@ref(eq:apportion-R) becomes $N_{y,a,j}$, and can be summed to obtain the aggregate run returning in year $y$ by $N_y =\sum_j\sum_aN_{y,a,j}$.
+
+2.  The $\varepsilon_y$ term from eqn. \@ref(eq:residuals) becomes $\varepsilon_{y,j}$ and is modeled as a multivariate normal vector within a brood year:
+
+    \begin{equation}
+    \boldsymbol{\varepsilon}_{y} \sim \mathcal{MVN}\left(\mathbf{0}, \Sigma_R\right)
+    \end{equation}
+
+3.  The $\sigma_{R,j}$ parameters are captured along the root diagonal of the covariance matrix $\Sigma_R$. This matrix is estimated with an inverse Wishart prior distribution, see the model code and @staton-etal-2020 for details.
+
+4.  Correlation in the recruitment residual time series vectors $\boldsymbol{\varepsilon}_i$ and $\boldsymbol{\varepsilon}_k$ between populations $i$ and $k$ ($\rho_{i,k}$) is estimated and captured in the off-diagonal covariance elements of $\Sigma_R$.
+
+5.  Harvest is still modeled for each population, and although they share a common exploitation rate, harvest is fitted on the population aggregate basis. That is, rather than having the separate harvest to be attributable to each population for each separate model, we can fit the model to the aggregate scale on which it is monitored.
+
+6.  In years where the age composition was sampled for the aggregate population, it was fitted on this basis. That is, in the early years of the times series, the proportion of the aggregate run in year $y$ that was age $a$ was used as the expected frequency when fitting to scale samples that were not assignable using genetic stock identification. In this case, a single multinomial likelihood was used each year. When age composition data were attributable to individual populations, they were then fitted on the population-specific basis, with 8 independent multinomial likelihoods each year.
+
+7.  All maturity parameters were shared among populations within an age and brood year. The separated approach estimates different maturity parameters for each population.
+
+### JAGS Model Code
+
+```{r, comment = NA}
+mod_file = "ssm-model.R"
+mod = readLines(file.path("../fit-integrated-model/", mod_file))
+
+fline = which(mod == "jags_model = function() {")
+lline = which(mod == "}")
+model_code = mod[fline:lline]
+model_code[1] = "model {"
+```
+
+`r details::details(model_code, summary = "View Code")`

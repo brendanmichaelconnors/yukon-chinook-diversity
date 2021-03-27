@@ -1,0 +1,964 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+## Results {#int-results}
+
+**Notation:**
+
+```{r}
+# set colors
+cols = list(
+  solid = c(Separated = "royalblue", Integrated = "tomato"),
+  transparent = scales::alpha(c(Separated = "royalblue", Integrated = "tomato"), 0.4)
+)
+
+# function to color Rmarkdown text. from https://bookdown.org/yihui/rmarkdown-cookbook/font-color.html
+colorize <- function(x, color) {
+  if (knitr::is_latex_output()) {
+    sprintf("\\textcolor{%s}{%s}", color, x)
+  } else if (knitr::is_html_output()) {
+    sprintf("<span style='color: %s;'>%s</span>", color, 
+      x)
+  } else x
+}
+```
+
+-   `r colorize(paste0("Estimates from the ", names(cols[[1]])[1], " Approach"), cols$solid[1])`
+-   `r colorize(paste0("Estimates from the ", names(cols[[1]])[2], " Approach"), cols$solid[2])`
+-   All other notation in figures is identical to those in the [separated model results](#sep-results).
+
+```{r prep-data-samples}
+# CRAN packages
+library(reshape2)
+library(mvtnorm)
+library(scales)
+library(knitr)
+library(kableExtra)
+library(dplyr)
+library(coda)
+library(stringr)
+library(postpack)
+
+# clear the workspace
+rm(list = setdiff(ls(), c("my_par", "cols", "kable_format")))
+
+# load functions
+source("../fit-integrated-model/functions.R")
+
+# locations of samples
+post_dir = "../posterior-samples/"
+int_post_file = "integrated-posterior-paper.rds"
+sep_post_file = "single-pop-SS-SRA-posteriors.27Oct2020.RDS"
+```
+
+```{r new-functions}
+# function for renaming posterior nodes: candidate for postpack
+post_rename = function(post, param_original, param_new) {
+  
+  matches = match_params(post, param_original)
+  post_m = as.matrix(post, chains = T, iters = T)
+  which_matches = which(colnames(post_m) %in% matches)
+  
+  original_base = stringr::str_remove_all(param_original, "[\\^\\[]")
+  
+  colnames(post_m)[which_matches] = stringr::str_replace(colnames(post_m)[which_matches], original_base, param_new)
+  
+  post_convert(post_m)
+}
+
+compare_boxplot = function(post_list, param, cols, ylab, by_1000 = F) {
+  
+  div_by = ifelse(by_1000, 1000, 1)
+  
+  summs = lapply(post_list, function(post) post_summ(post, param = param, probs =  c(0.025, 0.25, 0.5, 0.75, 0.975))[-c(1:2),]/div_by)
+  posts = lapply(post_list, function(post) post_subset(post, param, matrix = T)/div_by)
+  means = lapply(post_list, function(post) mean(post_subset(post, param, T)/div_by))
+  
+  bp_info = lapply(posts, boxplot, plot = F)
+  for (m in 1:length(post_list)) {
+    bp_info[[m]]$stats = summs[[m]]
+  }
+  
+  main_x = 1:ncol(summs[[1]])
+  
+  n_models = length(post_list)
+  
+  at_x1 = main_x - 0.15
+  at_x2 = main_x + 0.15
+  
+  at_x = rbind(at_x1, at_x2)
+  
+  plot(main_x, xlab = "", ylab = ylab, ylim = range(summs), type = "n", xlim = range(at_x), axes = F)
+  box()
+  
+  for (m in 1:length(post_list)) {
+    bxp(bp_info[[m]], at = at_x[m,], outline = F, add = T,
+        boxwex = 0.3/n_models,
+        whisklty = 1, whisklwd = 2, whiskcol = cols$solid[m],
+        staplelwd = 2, staplecol = cols$solid[m], staplelty = 0,
+        boxcol = cols$solid[m], boxlwd = 2, boxfill = cols$transparent[m],
+        medcol = cols$solid[m], medlwd = 3,
+        axes = F)
+    abline(h = means[m], col = cols$solid[m], lty = 3, lwd = 2)
+  }
+  
+  usr = par("usr")
+  axis(side = 1, at = 1:ns, labels = rep("", ns))
+  text(x = 1:ns + 0.25, y = usr[3] - (usr[4] - usr[3]) * 0.03, labels = stocks, srt = 45, xpd = T, pos = 2)
+  axis(side = 2, las = 2)
+}
+
+param = "q_stock[.+,4,1]"
+
+compare_ts = function(post_list, param, main = NULL, years, obs = NULL, xlab = "", ylab = "", legend = T, cols, by_1000 = F) {
+  
+  x = lapply(post_list, function(post) post_summ(post, param))
+  
+  # reorder the values b/c years are all shuffled now
+  if (str_detect(param, ",")) {
+    if (str_count(param, ",") == 1) {
+      current_order1 = str_remove(str_remove(str_extract(colnames(x[[1]]), "\\[.+,"), "\\["), ",")
+      current_order2 = str_remove(str_remove(str_extract(colnames(x[[2]]), "\\[.+,"), "\\["), ",")
+    } else {
+      current_order1 = str_remove(str_remove(str_extract(colnames(x[[1]]), "\\[.+,.,"), "\\["), ",.,")
+      current_order2 = str_remove(str_remove(str_extract(colnames(x[[2]]), "\\[.+,.,"), "\\["), ",.,")
+    }
+  } else {
+    current_order1 = str_remove(str_remove(str_extract(colnames(x[[1]]), "\\[.+"), "\\["), "\\]")
+    current_order2 = str_remove(str_remove(str_extract(colnames(x[[2]]), "\\[.+"), "\\["), "\\]")
+  }
+  
+  new_order1 = order(as.numeric(current_order1))
+  new_order2 = order(as.numeric(current_order2))
+  x[[1]] = x[[1]][,new_order1]
+  x[[2]] = x[[2]][,new_order2]
+
+  if (by_1000) {
+    x = lapply(x, function(y) y/1000)
+    obs = obs/1000
+  }
+  
+  plot(1,1, type = "n", xlim = range(years), ylim = range(x, obs, na.rm = T), xlab = xlab, ylab = ylab, main = main, las = 1)
+  
+  polygon(c(years, rev(years)), c(x[[1]]["2.5%",], rev(x[[1]]["97.5%",])), col = cols$transparent[1], border = NA)
+  polygon(c(years, rev(years)), c(x[[2]]["2.5%",], rev(x[[2]]["97.5%",])), col = cols$transparent[2], border = NA)
+  
+  lines(x[[1]]["50%",] ~ years, col = cols$solid[1], lwd = 2)
+  lines(x[[2]]["50%",] ~ years, col = cols$solid[2], lwd = 2)
+  
+  if (!is.null(obs)) {
+    points(obs ~ years, pch = 16, col = "black", cex = 1.5)
+  }
+  
+  if (legend) {
+    legend("topright", legend = c(names(post_list), "Data"), col = c(cols$solid, "black"), lwd = c(2,2,NA), pch = c(NA,NA,16), bty = "n")
+  }
+}
+
+age_comp_plot = function(s) {
+  my_par(mfrow = c(2,2), mar = c(1,1,1.75,1), oma = c(2,2,0,0), cex.axis = 0.8)
+
+  q_obs = matrix(NA, nrow(obs$x_tas_obs), ncol = ncol(obs$x_tas_obs))
+  type = rep(NA, nrow(q_obs))
+  
+  for (t in 1:nrow(q_obs)) {
+    if (is.na(obs$x_tas_obs[t,1,s+1])) {
+      q_obs[t,] = obs$x_tas_obs[t,,1]
+      type[t] = "agg"
+    } else {
+      q_obs[t,] = obs$x_tas_obs[t,,s+1]
+      type[t] = "ss"
+    }
+  }
+  
+  q_obs = t(apply(q_obs, 1, function(x) x/sum(x)))
+  
+  arep = function(x, a) {
+    stringr::str_replace(x, pattern = "a", replacement = as.character(a))
+  }
+  
+  for (a in 1:4) {
+    compare_ts(post_list, arep(jrep("q_stock[.+,a,j]", s), a), paste0("Age ", ages[a]), years, legend = ifelse(a == 1, T, F), cols = cols)
+    points(q_obs[,a] ~ years, pch = ifelse(type == "agg", 1, 16), cex = 1.5)
+  }
+  
+  mtext(side = 1, outer = T, line = 1, "Return Year")
+  mtext(side = 2, outer = T, line = 1, "Age Composition")
+}
+```
+
+```{r prep-sep-post}
+# load in the posterior samples
+post_sep = readRDS(file = file.path(post_dir, sep_post_file))
+
+# fix variable names: some one-dimensional objects have two dimensions in variable name
+colnames(post_sep)[colnames(post_sep) %in% paste0("alpha[1,", 1:8, "]")] = paste0("alpha[", 1:8, "]")
+colnames(post_sep)[colnames(post_sep) %in% paste0("beta[1,", 1:8, "]")] = paste0("beta[", 1:8, "]")
+colnames(post_sep)[colnames(post_sep) %in% paste0("D.sum[1,", 1:8, "]")] = paste0("D.sum[", 1:8, "]")
+colnames(post_sep)[colnames(post_sep) %in% paste0("S.msy[1,", 1:8, "]")] = paste0("S.msy[", 1:8, "]")
+colnames(post_sep)[colnames(post_sep) %in% paste0("U.msy[1,", 1:8, "]")] = paste0("U.msy[", 1:8, "]")
+colnames(post_sep)[colnames(post_sep) %in% paste0("sigma.R[1,", 1:8, "]")] = paste0("sigma.R[", 1:8, "]")
+colnames(post_sep)[colnames(post_sep) %in% paste0("lnalpha[1,", 1:8, "]")] = paste0("lnalpha[", 1:8, "]")
+
+# place abundance quantities on fish scale, not thousands of fish
+post_sep[,str_detect(colnames(post_sep), "^S\\[")] = post_sep[,str_detect(colnames(post_sep), "^S\\[")] * 1000
+post_sep[,str_detect(colnames(post_sep), "^C\\[")] = post_sep[,str_detect(colnames(post_sep), "^C\\[")] * 1000
+post_sep[,str_detect(colnames(post_sep), "^R\\[")] = post_sep[,str_detect(colnames(post_sep), "^R\\[")] * 1000
+post_sep[,str_detect(colnames(post_sep), "^beta\\[")] = post_sep[,str_detect(colnames(post_sep), "^beta\\[")] / 1000
+post_sep[,str_detect(colnames(post_sep), "^N\\[")] = post_sep[,str_detect(colnames(post_sep), "^N\\[")] * 1000
+post_sep[,str_detect(colnames(post_sep), "^S\\.msy\\[")] = post_sep[,str_detect(colnames(post_sep), "^S\\.msy\\[")] * 1000
+
+# coerce to mcmc.list
+post_sep = post_convert(post_sep)
+
+# rename misc quantities for consistency with integrated ssm
+post_sep = post_rename(post_sep, "D.sum", "D_sum")
+post_sep = post_rename(post_sep, "^sigma.R[", "sigma_R")
+post_sep = post_rename(post_sep, "S.msy", "S_msy")
+post_sep = post_rename(post_sep, "U.msy", "U_msy")
+post_sep = post_rename(post_sep, "^q", "q_stock")
+post_sep = post_rename(post_sep, "^log.resid[", "log_resid")
+
+# drop out lnalpha
+post_sep = post_remove(post_sep, "lnalpha", ask = F)
+
+# re-order populations for consistency with main-text figures
+# White-Donjek needs to come right after LwrMain and before Stewart and Pelly
+old = get_params(post_sep, type = "base_index")
+new = old
+
+new[str_detect(old, "\\[2\\]")] = str_replace(old[str_detect(old, "\\[2\\]")], "\\[2\\]", "[3]")
+new[str_detect(old, "\\[3\\]")] = str_replace(old[str_detect(old, "\\[3\\]")], "\\[3\\]", "[4]")
+new[str_detect(old, "\\[4\\]")] = str_replace(old[str_detect(old, "\\[4\\]")], "\\[4\\]", "[2]")
+new[str_detect(old, ",2\\]$")] = str_replace(old[str_detect(old, ",2\\]$")], ",2\\]$", ",3]")
+new[str_detect(old, ",3\\]$")] = str_replace(old[str_detect(old, ",3\\]$")], ",3\\]$", ",4]")
+new[str_detect(old, ",4\\]$")] = str_replace(old[str_detect(old, ",4\\]$")], ",4\\]$", ",2]")
+
+x = as.matrix(post_sep)
+colnames(x) = new
+x = x[,sort(colnames(x))]
+post_sep = post_convert(cbind(postpack:::id_mat(post_sep), x))
+
+# get aggregate harvest
+C_stock = post_subset(post_sep, "^C", matrix = T)
+C_tot_post_sep = t(sapply(1:post_dim(post_sep, "saved"), function(i) rowSums(array_format(C_stock[i,]))))
+colnames(C_tot_post_sep) = paste0("C_tot[", 1:35, "]")
+post_sep = post_bind(post_sep, C_tot_post_sep)
+
+# get rho_mat
+resids = post_subset(post_sep, "^log_resid[", T)
+out = matrix(NA, nrow(resids), 8^2)
+for (i in 1:nrow(resids)) {
+  resids_i = array_format(resids[i,])
+  out[i,] = as.numeric(cor(resids_i))
+}
+names_mat = matrix(NA, 8, 8)
+for (i in 1:8) {
+  for (j in 1:8) {
+    names_mat[i,j] = paste0("rho_mat[", i, ",", j, "]")
+  }
+}
+colnames(out) = as.character(names_mat)
+post_sep = post_bind(post_sep, out)
+```
+
+```{r prep-int-post}
+post_int = readRDS(file.path(post_dir, int_post_file))
+
+# drop out rho_mat: the renaming step below will mess it up
+# and we are calculating this using recruitment residuals anyways
+post_int = post_remove(post_int, "rho_mat", F)
+
+# re-order populations for consistency with main-text figures
+# White-Donjek needs to come right after LwrMain and before Stewart and Pelly
+old = get_params(post_int, type = "base_index")
+new = old
+
+new[str_detect(old, "\\[2\\]")] = str_replace(old[str_detect(old, "\\[2\\]")], "\\[2\\]", "[3]")
+new[str_detect(old, "\\[3\\]")] = str_replace(old[str_detect(old, "\\[3\\]")], "\\[3\\]", "[4]")
+new[str_detect(old, "\\[4\\]")] = str_replace(old[str_detect(old, "\\[4\\]")], "\\[4\\]", "[2]")
+new[str_detect(old, ",2\\]$")] = str_replace(old[str_detect(old, ",2\\]$")], ",2\\]$", ",3]")
+new[str_detect(old, ",3\\]$")] = str_replace(old[str_detect(old, ",3\\]$")], ",3\\]$", ",4]")
+new[str_detect(old, ",4\\]$")] = str_replace(old[str_detect(old, ",4\\]$")], ",4\\]$", ",2]")
+
+x = as.matrix(post_int)
+colnames(x) = new
+x = x[,sort(colnames(x))]
+post_int = post_convert(cbind(postpack:::id_mat(post_int), x))
+
+# get rho_mat2: for consistent comparisons with the separate model
+# the nodes called "rho_mat" are calculated from the covariances in Sigma_R nodes
+
+resids = post_subset(post_int, "^log_resid[", T)
+out = matrix(NA, nrow(resids), 8^2)
+for (i in 1:nrow(resids)) {
+  resids_i = array_format(resids[i,])
+  out[i,] = as.numeric(cor(resids_i))
+}
+names_mat = matrix(NA, 8, 8)
+for (i in 1:8) {
+  for (j in 1:8) {
+    names_mat[i,j] = paste0("rho_mat2[", i, ",", j, "]")
+  }
+}
+colnames(out) = as.character(names_mat)
+post_int = post_bind(post_int, out)
+```
+
+```{r combine-post}
+# drop parameters from post_sep that are not in post_int
+params_sep = get_params(post_sep)
+params_int = get_params(post_int)
+keep_sep = params_sep[params_sep %in% c(params_int, "rho_mat")]
+post_sep = post_subset(post_sep, paste0("^", keep_sep))
+
+# combine into a list
+post_list = list(
+  Separated = post_sep,
+  Integrated = post_int
+)
+```
+
+```{r load data2}
+in_dir = "../fit-integrated-model/inputs"
+C_file = "catch-data.csv"
+S_file = "esc-data.csv"
+A_file = "age-data.csv"
+
+# read in the raw data files
+S_dat = read.csv(file.path(in_dir, S_file), stringsAsFactors = F)
+age_dat = read.csv(file.path(in_dir, A_file), stringsAsFactors = F)
+H_dat = read.csv(file.path(in_dir, C_file), stringsAsFactors = F)
+
+# re-order populations for consistency with main-text figures
+# White-Donjek needs to come right after LwrMain and before Stewart and Pelly
+top = S_dat[S_dat$stock %in% "LwrMain",]
+shift = S_dat[S_dat$stock %in% "White-Donjek",]
+bottom = S_dat[!(S_dat$stock %in% c("LwrMain", "White-Donjek")),]
+S_dat = rbind(top, shift, bottom)
+
+top = age_dat[age_dat$stock %in% c("aggregate", "LwrMain"),]
+shift = age_dat[age_dat$stock %in% "White-Donjek",]
+bottom = age_dat[!(age_dat$stock %in% c("aggregate", "LwrMain", "White-Donjek")),]
+age_dat = rbind(top, shift, bottom)
+
+# prepare the data files
+inputs = raw_data_prep(
+  S_dat = S_dat,
+  H_dat = H_dat,
+  age_dat = age_dat
+)
+
+# separate them into observed and params (params are pretty much all dimensions)
+obs = inputs$obs
+params = inputs$params
+attach(params)
+
+# create broodtables and get brood year recruitment by stock
+obs = gen_Rys_obs(params = params, obs = obs)
+
+# get year and brood year names
+years = as.numeric(rownames(obs$S_ts_obs))
+brood_years = (min(years) - 7):(max(years) - 4)
+```
+
+```{r dim-names}
+# year names
+years = 1985:2019
+
+# brood year names
+brood_years = (min(years) - 7):(max(years) - 4)
+```
+
+```{r}
+post = post_list[["Integrated"]]
+mcmc_statement = "**The MCMC diagnostic summaries in this section are for the integrated model.**"
+```
+
+```{r, eval = T, child = "chunks-convergence.Rmd"}
+```
+
+### Key Inferences {.tabset .tabset-dropdown}
+
+The primary results of comparing these two approaches are found in the drop down menu below. Select an item to see more detail on that topic.
+
+#### Fits to Data {.tabset .tabset-pills}
+
+Black points in all plots represent the observed value.
+
+##### Escapement
+
+*Both methods returned similar escapement time series. Only in very rare occasions did the estimated values differ substantially (e.g., early 1990s for the Carmacks population).*
+
+```{r esc-fig, fig.width = 5, fig.height = 7}
+jrep = function(x, j) {
+  stringr::str_replace(x, "j", as.character(j))
+}
+
+my_par(mfrow = c(4,2), mar = c(1.5,1.5,2,1), oma = c(2,2,0,0))
+
+for (j in 1:8) {
+  compare_ts(post_list, jrep("^S[.+,j]", j), stocks[j], years, obs$S_ts_obs[,j], legend = ifelse(j == 1, T, F), cols = cols, by_1000 = T)
+}
+
+mtext(side = 1, outer = T, line = 0.5, "Return Year")
+mtext(side = 2, outer = T, line = 0.5, "Escapement (000s)")
+
+```
+
+##### Harvest
+
+The separated approach fitted to population-apportioned harvest based on the assumption of equal exploitation rates among populations. The integrated model fitted to the aggregate harvest using this same assumption.
+
+*The integrated model fitted the aggregate harvest data a bit better, but this would be expected since the errors from 8 separate models are stacked to obtain this fit for the separated approach.*
+
+```{r harv-fig, fig.width = 6, fig.height = 4}
+my_par()
+compare_ts(post_list = post_list, param = "C_tot", years = years, obs = obs$C_tot_t_obs, legend = T, xlab = "Return Year", ylab = "Aggregate Harvest (000s)", cols = cols, by_1000 = T)
+```
+
+##### Age Composition {.tabset .tabset-pills}
+
+Empty circles represent years in which only the age composition of the aggregate run was available and filled circles represent years in which population-specific samples were available from genetic stock identification. The separated approach did not acknowledge the distinction except for with sample size, whereas the integrated model more explicitly captured this sampling structure. See the \@ref(alt-ssm-description) section for more details.
+
+*Because a less informative likelihood was used in the early years for the integrated model, the posteriors here are more variable and uncertain around the data than under the separated approach. Despite this, both approaches followed the data, as shown in the general increasing trend in age 4 and age 5 composition and decreasing trend in age 6 and age 7 composition that is captured by both approaches.*
+
+###### `r stocks[1]`
+
+```{r}
+age_comp_plot(1)
+```
+
+###### `r stocks[2]`
+
+```{r}
+age_comp_plot(2)
+```
+
+###### `r stocks[3]`
+
+```{r}
+age_comp_plot(3)
+```
+
+###### `r stocks[4]`
+
+```{r}
+age_comp_plot(4)
+```
+
+###### `r stocks[5]`
+
+```{r}
+age_comp_plot(5)
+```
+
+###### `r stocks[6]`
+
+```{r}
+age_comp_plot(6)
+```
+
+###### `r stocks[7]`
+
+```{r}
+age_comp_plot(7)
+```
+
+###### `r stocks[8]`
+
+```{r}
+age_comp_plot(8)
+```
+
+##### Recruitment
+
+Neither method fits to recruitment observations directly, but this figure helps show consistency between recruitment states estimated by the state-space models and through traditional brood tables.
+
+```{r rec-fig, fig.width = 5, fig.height = 7}
+jrep = function(x, j) {
+  stringr::str_replace(x, "j", as.character(j))
+}
+
+my_par(mfrow = c(4,2), mar = c(1.5,1.5,2,1), oma = c(2,2,0,0))
+
+for (j in 1:8) {
+  compare_ts(post_list, jrep("^R[.+,j]", j), stocks[j], brood_years, obs$R_ys_obs[,j], legend = ifelse(j == 1, T, F), cols = cols, by_1000 = T)
+}
+
+mtext(side = 1, outer = T, line = 0.5, "Brood Year")
+mtext(side = 2, outer = T, line = 0.5, "Escapement (000s)")
+
+```
+
+#### Harvest-Biodiversity Trade-off Curves {.tabset .tabset-pills}
+
+```{r trade-off-prep}
+# function to find which element of x is closest to y
+which_closest = function(x, y) {
+  which.min(abs(x - y))
+}
+
+U.range = seq(0, 1, 0.01)
+get_eq_quantities = function(post) {
+  
+  eq.ricker = function(U_msy, S_msy) {
+    
+    Seq = ((U_msy - log((1 - U_msy)/(1 - U.range)))/U_msy) * S_msy
+    Seq[Seq < 0] = 0
+    
+    Ceq = (U.range * Seq)/(1 - U.range)
+    Ceq[is.na(Ceq)] = 0
+    Ceq[Ceq < 0] = 0
+    
+    overfished = ifelse(U.range > U_msy, 1, 0)
+    extinct = ifelse(Seq == 0, 1, 0)
+    
+    return(list(S = Seq, C = Ceq, overfished = overfished, extinct = extinct))
+    
+  }
+  
+  U.msy.post = post_subset(post, "U_msy", matrix = T)
+  S.msy.post = post_subset(post, "S_msy", matrix = T)
+  
+  n.saved = nrow(post[[1]] * length(post))
+  ni = min(n.saved, 5000)
+  
+  n.U.range = length(U.range)
+  samp.i = sample(size = ni, x = 1:n.saved, replace = F)
+  
+  S.out = array(NA, dim = c(n.U.range,ni, ns))
+  C.out = array(NA, dim = c(n.U.range, ni, ns))
+  overfished.out = array(NA, dim = c(n.U.range, ni, ns))
+  extinct.out = array(NA, dim = c(n.U.range, ni, ns))
+  
+  S.tot = matrix(NA, n.U.range, ni)
+  C.tot = matrix(NA, n.U.range, ni)
+  p.overfished = matrix(NA, n.U.range, ni)
+  p.extinct = matrix(NA, n.U.range, ni)
+  
+  for (i in 1:ni) {
+    for (s in 1:ns) {
+      
+      temp = eq.ricker(U_msy = U.msy.post[samp.i[i],s], S_msy = S.msy.post[samp.i[i],s])
+      
+      S.out[,i,s] = temp$S
+      C.out[,i,s] = temp$C
+      overfished.out[,i,s] = temp$overfished
+      extinct.out[,i,s] = temp$extinct
+    }
+    
+    S.tot[,i] = rowSums(S.out[,i,])
+    C.tot[,i] = rowSums(C.out[,i,])
+    p.overfished[,i] = rowSums(overfished.out[,i,])/ns
+    p.extinct[,i] = rowSums(extinct.out[,i,])/ns
+  }
+  
+  list(
+    S.tot.summ = apply(S.tot, 1, function(x) c(mean = mean(x), sd = sd(x), quantile(x, c(0.5, 0.025, 0.975)))),
+    C.tot.summ = apply(C.tot, 1, function(x) c(mean = mean(x), sd = sd(x), quantile(x, c(0.5, 0.025, 0.975)))),
+    overfished.summ = apply(p.overfished, 1, function(x) c(mean = mean(x), sd = sd(x), quantile(x, c(0.5, 0.025, 0.975)))),
+    extinct.summ = apply(p.extinct, 1, function(x) c(mean = mean(x), sd = sd(x), quantile(x, c(0.5, 0.025, 0.975))))
+  )
+}
+tradeoff_plot = function(summs, response, against = "U", col = c("black", scales::alpha("grey25", 0.25)), add = F, legend = T, central = "50%", p_msy = 1) {
+  my_par(xaxs = "i", yaxs = "i")
+  
+  xlab = ifelse(against == "U", "Exploitation Rate", "Escapement (000s)")
+  
+  ylab = ifelse(response == "S.tot.summ", "Equilibrium Escapement (000s)", 
+                ifelse(response == "C.tot.summ", "Equilibrium Harvest (000s)",
+                       ifelse(response == "overfished.summ", "Proportion of Populations Overfished", "Proportion of Populations Extirpated")))
+  
+  by_1000 = ifelse(response %in% c("S.tot.summ", "C.tot.summ"), T, F)
+  
+  summ = summs[[response]]
+  
+  if (by_1000) summ = summ/1000
+  
+  if (against == "U") {
+    at_x = U.range
+  } else {
+    at_x = summs$S.tot.summ["50%",]/1000
+  }
+  
+  if (!add) {
+    plot(1,1, type = "n", xlab = xlab, ylab = ylab, xlim = range(at_x), ylim = c(0, max(summ["97.5%",])) * 1.01, las = 1)
+  }
+  
+  polygon(x = c(at_x, rev(at_x)), y = c(summ[4,], rev(summ[5,])), col = col[2], border = NA)
+  lines(summ[4,] ~ at_x, col = col[1])
+  lines(summ[5,] ~ at_x, col = col[1])
+  lines(summ[central,] ~ at_x, col = col[1], lwd = 4)
+  
+  msy = max(summs[["C.tot.summ"]]["50%",]/1000) * p_msy
+  msy_inds = sapply(msy, function(y) which_closest(summs[["C.tot.summ"]]["50%",]/1000, y))
+  
+  x_msy = at_x[msy_inds]
+  y_msy = summ[central,msy_inds]
+  segments(x_msy, 0, x_msy, y_msy, col = col[1], lty = c(2), lwd = 2)
+  segments(0, y_msy, x_msy, y_msy, col = col[1], lty = c(2), lwd = 2)
+  box()
+  
+  # if (legend) {
+  #   # legend()
+  # }
+}
+eq_out = lapply(post_list, get_eq_quantities)
+```
+
+##### X-axis: Exploitation Rate {.tabset .tabset-pills}
+
+*The integrated model suggested a smaller equilibrium aggregate population size than the separated approach, as shown by lower estimated escapement at a given exploitation rate. In addition to smaller populations, the integrated model estimated the populations to be less productive, generating a smaller maximum sustained aggregate harvest and aggregate* $U_{\mathrm{MSY}}$*. However, both approaches suggested that when fished at MSY, approximately 40% of the populations would be overfished (i.e., fished at an equilibrium exploitation rate greater than* $U_{\mathrm{MSY},j}$*).*
+
+###### Escapement
+
+```{r, fig.width = 6, fig.height = 4}
+my_par()
+tradeoff_plot(eq_out[[1]], "S.tot.summ", "U", col = c(cols$solid[1], cols$transparent[1]), F, "50%", 1)
+tradeoff_plot(eq_out[[2]], "S.tot.summ", "U", col = c(cols$solid[2], cols$transparent[2]), T, "50%", 1)
+legend("topright", legend = names(post_list), pch = 22, col = cols$solid, pt.bg = cols$transparent, bty = "n", pt.cex = 2)
+```
+
+###### Harvest
+
+```{r, fig.width = 6, fig.height = 4}
+my_par()
+tradeoff_plot(eq_out[[1]], "C.tot.summ", "U", col = c(cols$solid[1], cols$transparent[1]), F, "50%", 1)
+tradeoff_plot(eq_out[[2]], "C.tot.summ", "U", col = c(cols$solid[2], cols$transparent[2]), T, "50%", 1)
+legend("topleft", legend = names(post_list), pch = 22, col = cols$solid, pt.bg = cols$transparent, bty = "n", pt.cex = 2)
+```
+
+###### Populations Overfished
+
+```{r, fig.width = 6, fig.height = 4}
+my_par()
+tradeoff_plot(eq_out[[1]], "overfished.summ", "U", col = c(cols$solid[1], cols$transparent[1]), F, "mean", 1)
+tradeoff_plot(eq_out[[2]], "overfished.summ", "U", col = c(cols$solid[2], cols$transparent[2]), T, "mean", 1)
+legend("topleft", legend = names(post_list), pch = 22, col = cols$solid, pt.bg = cols$transparent, bty = "n", pt.cex = 2)
+```
+
+###### Populations Extirpated
+
+```{r, fig.width = 6, fig.height = 4}
+my_par()
+tradeoff_plot(eq_out[[1]], "extinct.summ", "U", col = c(cols$solid[1], cols$transparent[1]), F, "mean", 1)
+tradeoff_plot(eq_out[[2]], "extinct.summ", "U", col = c(cols$solid[2], cols$transparent[2]), T, "mean", 1)
+legend("topleft", legend = names(post_list), pch = 22, col = cols$solid, pt.bg = cols$transparent, bty = "n", pt.cex = 2)
+```
+
+##### X-axis: Eq. Escapement {.tabset .tabset-pills}
+
+###### Harvest
+
+```{r, fig.width = 6, fig.height = 4}
+my_par()
+tradeoff_plot(eq_out[[1]], "C.tot.summ", "S", col = c(cols$solid[1], cols$transparent[1]), F, "50%", 1)
+tradeoff_plot(eq_out[[2]], "C.tot.summ", "S", col = c(cols$solid[2], cols$transparent[2]), T, "50%", 1)
+legend("topright", legend = names(post_list), pch = 22, col = cols$solid, pt.bg = cols$transparent, bty = "n", pt.cex = 2)
+```
+
+###### Populations Overfished
+
+```{r, fig.width = 6, fig.height = 4}
+my_par()
+tradeoff_plot(eq_out[[1]], "overfished.summ", "S", col = c(cols$solid[1], cols$transparent[1]), F, "mean", 1)
+tradeoff_plot(eq_out[[2]], "overfished.summ", "S", col = c(cols$solid[2], cols$transparent[2]), T, "mean", 1)
+legend("topright", legend = names(post_list), pch = 22, col = cols$solid, pt.bg = cols$transparent, bty = "n", pt.cex = 2)
+```
+
+###### Populations Extirpated
+
+```{r, fig.width = 6, fig.height = 4}
+my_par()
+tradeoff_plot(eq_out[[1]], "extinct.summ", "S", col = c(cols$solid[1], cols$transparent[1]), F, "mean", 1)
+tradeoff_plot(eq_out[[2]], "extinct.summ", "S", col = c(cols$solid[2], cols$transparent[2]), T, "mean", 1)
+legend("topright", legend = names(post_list), pch = 22, col = cols$solid, pt.bg = cols$transparent, bty = "n", pt.cex = 2)
+```
+
+#### $S_{\mathrm{MSY},j}$
+
+*Both approaches returned fairly similar estimates of* $S_{\mathrm{MSY},j}$, though the integrated model generally suggested a smaller value in populations where they differed.
+
+```{r, fig.width = 6, fig.height = 4}
+my_par(mar = c(5,3.5,1,1))
+compare_boxplot(post_list, "S_msy", cols = cols, ylab = latex2exp::TeX("$\\S_{MSY,j}\\,(000s)$"), by_1000 = T)
+legend("top", horiz = T, x.intersp = 0.25, legend = names(post_list), lwd = 2, lty = c(NA, NA), col = cols$solid, pt.bg = cols$transparent, pch = 22, pt.cex = 2, bty = "n")
+```
+
+#### Productivity {.tabset .tabset-pills}
+
+Productivity is shown in terms of maximum expected recruits per spawner ($\alpha_j$) and the exploitation rate expected to maximize equilibrium yield from the population ($U_{\mathrm{MSY},j}$).
+
+*For nearly every population, the separated approach suggested higher productivity than the integrated approach.*
+
+##### $\alpha_j$
+
+```{r, fig.width = 6, fig.height = 4}
+my_par(mar = c(5,3.5,1,1))
+compare_boxplot(post_list, "alpha", cols = cols, ylab = latex2exp::TeX("$\\alpha_j$"))
+legend("topleft", horiz = F, x.intersp = 0.25, legend = names(post_list), lwd = 2, lty = c(NA, NA), col = cols$solid, pt.bg = cols$transparent, pch = 22, pt.cex = 2, bty = "n")
+```
+
+##### $U_{\mathrm{MSY},j}$
+
+```{r, fig.width = 6, fig.height = 4}
+my_par(mar = c(5,3.5,1,1))
+compare_boxplot(post_list, "U_msy", cols = cols, ylab = latex2exp::TeX("$\\U_{MSY,j}$"))
+legend("top", horiz = T, x.intersp = 0.25, legend = names(post_list), lwd = 2, lty = c(NA, NA), col = cols$solid, pt.bg = cols$transparent, pch = 22, pt.cex = 2, bty = "n")
+```
+
+#### Productivity vs. Size
+
+This figure shows the relationship between intrinsic productivity ($\alpha_j$) and equilibrium population size ($S_{\mathrm{eq},j} = \ln(\alpha_j)/\beta_j$). 
+
+_For most populations, the biggest shifts between models were decreasing productivity in the integrated model relative to the separated approach. This had the effect of "flattening" the relationship between productivity and population size._
+
+```{r, fig.width = 5, fig.height = 5}
+alpha_seq_out = lapply(post_list, function(post) {
+  alpha_post = post_subset(post, "alpha", T)
+  beta_post = post_subset(post, "beta", T)
+  Seq_post = log(alpha_post)/beta_post
+  colnames(Seq_post) = paste0("Seq[", 1:8, "]")
+  post = post_bind(post, Seq_post)
+  
+  list(
+    alpha = post_summ(post, "alpha"),
+    Seq = post_summ(post, "Seq")/1000
+  )
+})
+
+my_par()
+plot(alpha_seq_out[[1]]$alpha["50%",] ~ alpha_seq_out[[1]]$Seq["50%",], xlim = c(0,30), ylim = c(2, 8),
+     pch = 21, col = cols$solid[1], bg = cols$transparent[1], cex = 1.5, las = 1,
+     xlab = "Equilibrium Population Size (000s)", ylab = "Intrinsic Productivity (Max R/S)")
+segments(alpha_seq_out[[1]]$Seq["50%",], alpha_seq_out[[1]]$alpha["50%",],
+         alpha_seq_out[[2]]$Seq["50%",], alpha_seq_out[[2]]$alpha["50%",],
+         col = "grey")
+points(alpha_seq_out[[2]]$alpha["50%",] ~ alpha_seq_out[[2]]$Seq["50%",],
+       pch = 21, col = cols$solid[2], bg = cols$transparent[2], cex = 1.5)
+legend("topright", legend = names(post_list), pch = 22, col = cols$solid, pt.bg = cols$transparent, bty = "n", pt.cex = 2)
+
+```
+
+
+#### Recruitment Variability
+
+*The integrated model suggested **much** higher variability in recruitment than the separated model. When this model was applied to Kuskokwim River Chinook salmon, \@staton-etal-2020 also found abnormally high estimates of recruitment variability. Recall that observation variability has supposedly been partitioned away from these estimates. Also, note that lognormal standard deviations less than \~0.6 are approximately equal to coefficients of variation of the natural scale random variables, per eqn.* \@ref(eq:get-sigma)*.* *For example, a standard deviation of 0.5 is a CV of 53%, but a standard deviation of 0.8 is a CV of 95%. Estimates from the separate model approach are more on the scale of what we expect.*
+
+```{r, fig.width = 6, fig.height = 4}
+my_par(mar = c(5,3,1,1))
+compare_boxplot(post_list, "sigma_R", cols = cols, ylab = latex2exp::TeX("$\\sigma_{R,j}$"))
+legend("top", horiz = T, x.intersp = 0.25, legend = names(post_list), lwd = 2, lty = c(NA, NA), col = cols$solid, pt.bg = cols$transparent, pch = 22, pt.cex = 2, bty = "n")
+```
+
+#### Recruitment Autocorrelation
+
+*The integrated model estimated lower (and even negative) correlation in the each population's recruitment residual time series.*
+
+```{r, fig.width = 6, fig.height = 4}
+my_par(mar = c(5,3,1,1))
+compare_boxplot(post_list, "phi", cols = cols, ylab = latex2exp::TeX("$\\phi_j$"))
+legend("bottom", horiz = T, x.intersp = 0.25, legend = names(post_list), lwd = 2, lty = c(NA, NA), col = cols$solid, pt.bg = cols$transparent, pch = 22, pt.cex = 2, bty = "n")
+```
+
+#### Recruitment Synchrony {.tabset .tabset-pills}
+
+##### Correlation Matrices {.tabset .tabset-pills}
+
+These correlations were calculated using the recruitment residual time series ($v_{y,j}$) between two populations. The correlation was calculated for each posterior sample from each model. Although the correlation was contained in the covariance matrix $\Sigma_R$ for the integrated model, the residual vectors $y_{y,j}$ were used for consistency in comparisons. 
+
+Populations are ordered approximately from downstream (top/left) to upstream (bottom/right).
+
+*In general, correlation in recruitment residuals was estimated to be lower under the integrated model.*
+
+###### Separated Approach
+
+```{r}
+corr = array_format(post_summ(post_list[[1]], "rho_mat")["50%",])
+rownames(corr) = stocks
+colnames(corr) = stocks
+mean_corr = mean(corr[lower.tri(corr)])
+```
+
+Mean posterior median correlation among two populations: `r round(mean_corr, 2)`
+
+```{r, fig.width = 6, fig.height = 6}
+corrplot::corrplot(corr, type = "lower")
+```
+
+###### Integrated Approach
+
+```{r}
+# Use of "rho_mat2" is deliberate. this was calculated as the same way as for the separated model approach
+corr = array_format(post_summ(post_list[[2]], "rho_mat2")["50%",])
+rownames(corr) = stocks
+colnames(corr) = stocks
+mean_corr = mean(corr[lower.tri(corr)])
+```
+
+Mean posterior median correlation among two populations: `r round(mean_corr, 2)`
+
+```{r, fig.width = 6, fig.height = 6}
+corrplot::corrplot(corr, type = "lower")
+```
+
+##### Residual Time Series
+
+This figure shows the 8 population-specific recruitment residual time series ($v_{y,j}$) in grey and the average across populations as the heavy black line.
+
+*Here we see the outcomes of lower recruitment correlation between populations, lower autocorrelation among years, and higher inter-annual variability under the integrated model. Note that y-axis value of 2 indicates a recruitment event that is* `r round(exp(2), 2)` *times that expected from the deterministic Ricker relationships, and a y-axis value of -2 indicates one that is* `r round(exp(-2), 2)` *times the expected value.*
+
+```{r, fig.width = 10, fig.height = 4}
+my_par(mfrow = c(1,2))
+
+max_resid = max(unlist(lapply(post_list, function(post) max(abs(post_summ(post, "log_resid[")["50%",])))))
+
+log_resid = array_format(post_summ(post_list[["Separated"]], "log_resid[")[3,])
+mean_resid = rowMeans(log_resid)
+plot(mean_resid ~ brood_years, type = "n", ylim = c(-max_resid, max_resid), las = 1, main = "Separated", xlab = "Brood Year", ylab = "log(Recruitment Residual)")
+for (s in 1:ns) {lines(log_resid[,s] ~ brood_years, col = "grey")}
+lines(mean_resid ~ brood_years, lwd = 2)
+abline(h = 0, lwd = 2, lty = 3, col = "red")
+
+log_resid = array_format(post_summ(post_list[["Integrated"]], "log_resid[")[3,])
+mean_resid = rowMeans(log_resid)
+plot(mean_resid ~ brood_years, type = "n", ylim = c(-max_resid, max_resid), las = 1, main = "Integrated", xlab = "Brood Year", ylab = "log(Recruitment Residual)")
+for (s in 1:ns) {lines(log_resid[,s] ~ brood_years, col = "grey")}
+lines(mean_resid ~ brood_years, lwd = 2)
+abline(h = 0, lwd = 2, lty = 3, col = "red")
+```
+
+#### Recruitment Relationships {.tabset .tabset-pills}
+
+##### Relationships Only
+
+*The recruitment relationships from the integrated model suggested lower recruitment at a given escapement level. The posterior of the estimated relationships were also suggested to be more precise.*
+
+```{r fig.width = 5, fig.height = 7}
+compare_sr_curve = function(stock, legend = T) {
+  S_match = paste0("^S[.+,", stock, "]")
+  alpha_match = paste0("^alpha\\[", stock, "\\]")
+  beta_match = paste0("^beta\\[", stock, "\\]")
+  
+  S_meds = sapply(post_list, function(post) post_summ(post, S_match)["50%",])
+  S_upr = max(S_meds)
+  
+  pred_S = seq(0, S_upr, length = 100)
+  
+  alpha_post = sapply(post_list, function(post) post_subset(post, alpha_match, T, auto_escape = F))
+  beta_post = sapply(post_list, function(post) post_subset(post, beta_match, T))
+
+  predict_R = function(S, alpha, beta) {
+    alpha * S * exp(-beta * S)
+  }
+  
+  
+  pred_R1 = t(sapply(1:10000, function(i) predict_R(pred_S, alpha_post[i,1], beta_post[i,1])))
+  pred_R2 = t(sapply(1:10000, function(i) predict_R(pred_S, alpha_post[i,2], beta_post[i,2])))
+  
+  pred_R1 = apply(pred_R1, 2, function(x) c(mean = mean(x), sd = sd(x), quantile(x, c(0.5, 0.025, 0.975))))
+  pred_R2 = apply(pred_R2, 2, function(x) c(mean = mean(x), sd = sd(x), quantile(x, c(0.5, 0.025, 0.975))))
+  
+  pred_R1 = pred_R1/1000
+  pred_R2 = pred_R2/1000
+  pred_S = pred_S/1000
+  
+  plot(1,1, type = "n", xlim = range(pred_S), main = stocks[stock],
+       ylim = range(0, pred_R1["97.5%",], pred_R2["97.5%",]), xlab = "", ylab = "", las = 1)
+  
+  polygon(c(pred_S, rev(pred_S)), c(pred_R1["2.5%",], rev(pred_R1["97.5%",])), col = cols$transparent[1], border = NA)
+  polygon(c(pred_S, rev(pred_S)), c(pred_R2["2.5%",], rev(pred_R2["97.5%",])), col = cols$transparent[2], border = NA)
+  lines(pred_R1["50%",] ~ pred_S, col = cols$solid[1], lwd = 2)
+  lines(pred_R2["50%",] ~ pred_S, col = cols$solid[2], lwd = 2)
+  abline(0, 1, lty = 2)
+  
+  if (legend) {
+    legend("topleft", legend = names(post_list), lwd = 2, col = cols$solid, bty = "n")
+  }
+}
+
+my_par(mfrow = c(4,2), mar = c(1.5,1.5,2,1), oma = c(2,2,0,0))
+for (j in 1:8) {
+  compare_sr_curve(j, legend = ifelse(j == 1, T, F))
+}
+mtext(side = 1, outer = T, line = 0.5, "Escapement (000s)")
+mtext(side = 2, outer = T, line = 0.5, "Recruitment (000s)")
+```
+
+##### Recruitment Pairs
+
+Numbers in the top left corner are the posterior median estimates of $\sigma_{R,j}$ for each model -- this is a model-estimated measure of how variable recruitment is around the expected curve.
+
+```{r fig.width = 5, fig.height = 7}
+compare_sr_points = function(stock, legend = T) {
+  S_match = paste0("^S[.+,", stock, "]")
+  R_match = paste0("^R[.+,", stock, "]")
+  alpha_match = paste0("^alpha\\[", stock, "\\]")
+  beta_match = paste0("^beta\\[", stock, "\\]")
+  sigma_R_match = paste0("^sigma_R\\[", stock, "\\]")
+
+  S_ind = 1:(nt - a_min)
+  R_ind = (a_max + 1):ny
+  
+  S_meds = lapply(post_list, function(post) post_summ(post, S_match)["50%",])
+  S_meds[[1]] = S_meds[[1]][names(S_meds[[2]])]
+  R_meds = lapply(post_list, function(post) post_summ(post, R_match)["50%",])
+  R_meds[[1]] = R_meds[[1]][names(R_meds[[2]])]
+  
+  S_meds = lapply(S_meds, function(x) x[S_ind])
+  R_meds = lapply(R_meds, function(x) x[R_ind])
+  
+  S_upr = max(sapply(S_meds, max))
+  
+  pred_S = seq(0, S_upr, length = 100)
+  
+  alpha_post = sapply(post_list, function(post) post_subset(post, alpha_match, T, auto_escape = F))
+  beta_post = sapply(post_list, function(post) post_subset(post, beta_match, T))
+  sigma_R_meds = round(sapply(post_list, function(post) post_summ(post, sigma_R_match)["50%",]), 3)
+  
+  predict_R = function(S, alpha, beta) {
+    alpha * S * exp(-beta * S)
+  }
+  
+  pred_R1 = t(sapply(1:10000, function(i) predict_R(pred_S, alpha_post[i,1], beta_post[i,1])))
+  pred_R2 = t(sapply(1:10000, function(i) predict_R(pred_S, alpha_post[i,2], beta_post[i,2])))
+  
+  pred_R1 = apply(pred_R1, 2, function(x) c(mean = mean(x), sd = sd(x), quantile(x, c(0.5, 0.025, 0.975))))
+  pred_R2 = apply(pred_R2, 2, function(x) c(mean = mean(x), sd = sd(x), quantile(x, c(0.5, 0.025, 0.975))))
+  
+  pred_R1 = pred_R1/1000
+  pred_R2 = pred_R2/1000
+  pred_S = pred_S/1000
+  
+  R_meds = lapply(R_meds, function(x) x/1000)
+  S_meds = lapply(S_meds, function(x) x/1000)
+
+  plot(1,1, type = "n", xlim = c(0, max(pred_S)) * 1.05, main = stocks[stock],
+       ylim = range(0, R_meds) * 1.2, xlab = "", ylab = "", las = 1)
+
+  lines(pred_R1["50%",] ~ pred_S, lwd = 2, col = cols$solid[1])
+  lines(pred_R2["50%",] ~ pred_S, lwd = 2, col = cols$solid[2])
+
+  points(R_meds[[1]] ~ S_meds[[1]], pch = 16, col = cols$transparent[1], cex = 1.5)
+  points(R_meds[[2]] ~ S_meds[[2]], pch = 16, col = cols$transparent[2], cex = 1.5)
+  arrows(S_meds[[1]], R_meds[[1]], S_meds[[2]], R_meds[[2]], col =  cols$transparent[2], length = 0.05)
+  abline(0, 1, lty = 2)
+
+  if (legend) {
+    legend("topright", legend = names(post_list), col = cols$transparent, pt.cex = 2, pch = 15, bty = "n")
+  }
+
+  usr = par("usr"); xdiff = diff(usr[1:2]); ydiff = diff(usr[3:4])
+  text(x = rep(usr[1], 2), y = usr[4] + ydiff * c(-0.05, -0.15), labels = sigma_R_meds, col = cols$solid, pos = 4)
+}
+
+my_par(mfrow = c(4,2), mar = c(1.5,1.5,2,1), oma = c(2,2,0,0), xaxs = "i", yaxs = "i")
+for (j in 1:8) {
+  compare_sr_points(j, legend = ifelse(j == 1, T, F))
+}
+mtext(side = 1, outer = T, line = 0.5, "Escapement (000s)")
+mtext(side = 2, outer = T, line = 0.5, "Recruitment (000s)")
+```
