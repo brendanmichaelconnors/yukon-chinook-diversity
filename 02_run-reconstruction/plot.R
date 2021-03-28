@@ -565,7 +565,7 @@ plotArrival <- function( rpt, folder="." )
 
 plotArrivalByYear <- function( rpt, folder="." )
 {
-  controlTable  <- .readParFile( "estControlFile.txt" )
+  controlTable  <- .readParFile( "./02_run-reconstruction/estControlFile.base.txt" )
   ctrl <- .createList( controlTable )
   stocks <- ctrl$stks
 
@@ -670,7 +670,7 @@ plotStats <- function()
   sims <- c("sim_OM_base","sim_OM_incFW","sim_OM_incS","sim_OM_incFWS")
   simName <- c("OM_base","OM_incFW","OM_incS","OM_incFWS")
 
-  controlTable  <- .readParFile( "estControlFile.txt" )
+  controlTable  <- .readParFile( "./02_run-reconstruction/estControlFile.base.txt" )
   ctrl <- .createList( controlTable )
   stocks <- ctrl$stks
 
@@ -724,7 +724,7 @@ plotStatsVar <- function()
   ests <- c("mod1-uncor","mod2-singleCor","mod3-fullCor")
   sims <- c("sim_OM_base","sim_OM_incFW","sim_OM_incS","sim_OM_incFWS")
 
-  controlTable  <- .readParFile( "estControlFile.txt" )
+  controlTable  <- .readParFile( "./02_run-reconstruction/estControlFile.base.txt" )
   ctrl <- .createList( controlTable )
   stocks <- ctrl$stks
 
@@ -775,7 +775,7 @@ plotStatsMu <- function()
   ests <- c("mod1","mod2","mod3")
   sims <- c("sim_OM_base","sim_OM_incFW","sim_OM_incS","sim_OM_incFWS","sim_OM_big")
 
-  controlTable  <- .readParFile( "estControlFile.txt" )
+  controlTable  <- .readParFile( "./02_run-reconstruction/estControlFile.base.txt" )
   ctrl <- .createList( controlTable )
   stocks <- ctrl$stks
 
@@ -826,7 +826,7 @@ plotStatsMu <- function()
 
 plotDevSD <- function()
 {
-  controlTable  <- .readParFile( "estControlFile.txt" )
+  controlTable  <- .readParFile( "./02_run-reconstruction/estControlFile.base.txt" )
   ctrl <- .createList( controlTable )
   stocks <- ctrl$stks
   cols <- brewer.pal(3,"Set1")
