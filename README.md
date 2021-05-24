@@ -1,6 +1,6 @@
 # yukon-chinook-diversity
 Data and code to reproduce analyses in:
-> Population diversity in Canadian-origin Chinook salmon: portfolio quantification and implications for conservation, harvest, equity, and resilience. In preparation. Connors B.M., Siegle M.R., Harding J., Rossi S., Staton B., Jones M., Bradford M., Browne R., Bechtol B., Doherty B. and S. Cox.
+> Population diversity in Canadian-origin Chinook salmon: portfolio quantification and implications for conservation, harvest, equity, and resilience. In review. Connors B.M., Siegle M.R., Harding J., Rossi S., Staton B., Jones M., Bradford M., Browne R., Bechtol B., Doherty B. and S. Cox.
 
 This project consists of 3 primary components: 
 1. a state-space run-reconstruction model fitted to daily estimates of total border passage and population composition to estimate annual population-specific border passage and spawner abundance; 
