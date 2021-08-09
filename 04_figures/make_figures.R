@@ -738,6 +738,19 @@ print(g)
 dev.off()
 
 # Figure 10: CV in run-size ----
+
+# Confirm Taylor's power law is met with our particular dataset
+
+Taylor_power <- ensemble%>%
+  group_by(population)%>%
+  summarize(mean_abund = mean(med*1000),
+            var_abund = var(med*1000))
+
+lm(log(Taylor_power$var_abund)~log(Taylor_power$mean_abund))
+
+plot(log(Taylor_power$var_abund)~log(Taylor_power$mean_abund),xlim=c())
+abline(lm(log(Taylor_power$var_abund)~log(Taylor_power$mean_abund)))
+
 indCVs <- matrix(NA,1000,8); colnames(indCVs)<-unique(spawn_df$population)
 for (i in unique(spawn_df$population)){
   for(j in 1:1000){
@@ -763,7 +776,7 @@ CV.long$pop <- factor(CV.long$pop, levels = c("Aggregate","Lower Mainstem","Whit
                                               "Carmacks","Upper Lakes and Mainstem","Teslin"))
 weights <- ensemble%>%
   group_by(population)%>%
-  summarize(weights = sum(med)/2292)
+  summarize(weights = sum(med)/2.292)
 
 var_damp <- matrix(NA,1000,1)
 for(i in 1:1000){
@@ -773,6 +786,14 @@ for(i in 1:1000){
 }
 
 quantile(as.vector(var_damp), probs=c(0.025,0.5,0.975))
+
+#var_damp_unweight <- matrix(NA,1000,1) 
+#for(i in 1:1000){
+#  sub_samp <- CVs.df[sample(1:1000,1),]
+#  var_damp_unweight[i,1] <- as.numeric((sum(sub_samp[1:8])/8)/sub_samp[9])
+#}
+
+#quantile(as.vector(var_damp_unweight), probs=c(0.025,0.5,0.975))
 
 ensemble$population <-lapply(ensemble$population, as.character)
 run_size_Carmacks <- rbind(ensemble[ensemble$population == "Upper Lakes and Mainstem",],
