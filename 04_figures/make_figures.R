@@ -287,7 +287,7 @@ RS_df2$population <- factor(RS_df2$population, levels = c("Lower Mainstem","Whit
                                                           "Carmacks","Upper Lakes and Mainstem","Teslin"))
 
 
-# Figure 3: border passage and GSI samples -----
+# Figure S1: border passage and GSI samples -----
 bc <- border_passage %>%
   drop_na(count) %>%
   group_by(year, count_type) %>%
@@ -410,69 +410,46 @@ print(g)
 dev.off()
 
 
-# Figure 4: daily border passage ----
+# Figure 4: multi-panel daily border passage + corr run-timing + annual border passage ----
+
+# daily border passage
 load("./02_run-reconstruction/rr_outputs/rpt.fullCor.Rdata")
-
 rr_mod <- rpt
-pop_col  <- viridis(8)
-pop_col_order <- pop_col[c(1,4,2,3,5,6,7,8)]
 geo_stk_num <- c(1,2,4,3,7,5,8,6)
+avg_run_time <- matrix(NA,126,8)
 
-stks <- c("Lower Mainstem","White-Donjek","Stewart","Pelly","Middle Mainstem","Carmacks","Upper Mainstem","Teslin")
-y_h <- cbind(geo_stk_num ,seq(0.1,0.8,length.out=8), pop_col_order, stks)
-y_h_2 <- y_h[order(y_h[,1]),]
-
-
-jpeg("04_figures/figures/figure4.jpg",width=5.5, height=4,units="in",res=400,bg = "transparent")
-
-  par(mfrow=c(1,1), mar=c(2,1,1,1), oma=c(2,2,0,0) )
-  plot(x=c(175,270), y=c(0.1,0.9), type="n", yaxt="n",las=1 , xaxt="n")
-  box(col="grey")
-
-  for(s in geo_stk_num){
-    x1_d <- numeric( rr_mod $nD )
-    x2_d <- numeric( rr_mod $nD )
-    for( d in 1: rr_mod $nD )
-      {
-        x1_d[d] <- mean(rr_mod $rho_dst[d,s, ])
-        x2_d[d] <- median(rr_mod $rho_dst[d,s, ])
-      }
-    x2_d <- x2_d/sum(x2_d)
-    x1_d <- x1_d + as.numeric(y_h_2[s,2])
-    lines( x= rr_mod $day_d, y=x1_d, lwd=1.5,col= y_h_2[s,3])
-    polygon(c(rr_mod $day_d,rev(rr_mod $day_d)),
-          c((x1_d),rep(as.numeric(y_h_2[s,2]),length.out=length(x1_d))),col= y_h_2[s,3],border=NA)
-    text(x = 240, y = (as.numeric(y_h_2[s,2]) + 0.05), labels= y_h_2[s,4], pos = 4, cex = 0.95,col= y_h_2[s,3])
+for(s in geo_stk_num){
+  for( d in 1: rr_mod $nD )
+  {
+    avg_run_time[d,s] <- mean(rr_mod $rho_dst[d,s, ])
   }
+}
 
-  axis(1,at =c(182, 201, 221, 244, 263), labels=c("July 1", "July 21", "Aug. 9", "Sep. 1", "Sep. 20"))
-  mtext( side=1, text="Day of year", outer=TRUE, line=0.3, cex=1)
-  mtext( side=2, text="Proportion passing border", outer=TRUE, line=0.2, cex=1)
-dev.off()
+run_time <- cbind(seq(160,285,1),avg_run_time)
+colnames(run_time) <- c("day","Lower Mainstem", "White-Donjek", "Pelly", "Stewart", "Carmacks", "Teslin", "Middle Mainstem", "Upper Mainstem")
+run_time <- as.data.frame(run_time)
 
-# Figure 5: Border passage by population ----
+run_time_long <- run_time%>%
+  pivot_longer(cols=2:9, names_to = "population", values_to="passage")
 
-b <- ggplot(ensemble, aes(x = as.factor(year), y = med, fill = pops_f)) + 
-          geom_bar(stat = "identity",colour = "black", width=1) +
-          scale_fill_manual(values = c("#440154FF", "#277F8EFF","#46337EFF", "#365C8DFF", "#1FA187FF", "#4AC16DFF","#9FDA3AFF", "#FDE725FF")) +
-          geom_errorbar(data=ensemble, aes(x= as.factor(year), ymin= lwr_2.5, ymax=upr_97.5, width=.1)) +
-          xlab("Year") +
-          ylab("Run size (000)") +
-          coord_cartesian(ylim = c(0,40))+
-          scale_x_discrete(breaks = c("1984","1988","1992","1996","2000","2004","2008","2012","2016")) +
-          theme_bw() +
-          facet_wrap(~pops_f, ncol=2) +
-          theme(strip.text = element_text(size=10)) +
-          theme(axis.text.x = element_text(angle=45, hjust=1)) +
-          theme(axis.text = element_text(size=10)) +
-          theme(axis.title = element_text(size=10))+
-          theme(legend.position = "none")
+run_time_long$population <- factor(run_time_long$population, levels = c("Teslin","Upper Mainstem","Carmacks","Middle Mainstem",
+                                                                            "Pelly", "Stewart","White-Donjek","Lower Mainstem"))
+a <- ggplot(run_time_long, aes(x = day, y = population, height=passage, fill=population,color=population)) +
+      geom_density_ridges(stat="identity",scale = 1.4) +
+      scale_fill_manual(values = rev(c("#440154FF","#277F8EFF" ,"#46337EFF" ,"#365C8DFF"  ,"#1FA187FF","#4AC16DFF","#9FDA3AFF","#FDE725FF" )))+
+      scale_color_manual(values = rev(c("#440154FF","#277F8EFF" ,"#46337EFF" ,"#365C8DFF"  ,"#1FA187FF","#4AC16DFF","#9FDA3AFF","#FDE725FF" )))+
+      coord_cartesian(xlim = c(175, 265)) +
+      xlab("Day of year") +
+      theme_bw() +
+      theme(axis.title = element_text(size=9),
+          axis.text = element_text(size=6),
+          axis.title.y = element_blank(),
+          panel.grid.minor = element_blank(),
+          legend.position = "none",
+          plot.margin = unit(c(1,1,1,0), units = "lines")) 
 
-jpeg("04_figures/figures/figure5.jpg", width = 6, height = 6, units = "in", res = 600)
-print(b)
-dev.off()
 
-# Figure 6: Correlation in run-timing ----
+# correlation in run-timing 
 run_corr <- cov2cor(rpt$cov_ss)
 run_corr_2 <- run_corr[c(6,8,5,7,3,4,2,1),c(6,8,5,7,3,4,2,1)]
 colnames(run_corr_2) <- c("Teslin","Upper Mainstem","Carmacks","Middle Mainstem","Pelly","Stewart","White-Donjek","Lower Mainstem")
@@ -483,12 +460,36 @@ b <- ggcorrplot(run_corr_2, type = "upper",
                 lab = "TRUE",
                 legend.title = "Correlation",
                 show.legend = FALSE,
-                lab_size = 2.4,
-                tl.cex = 8) 
+                lab_size = 2,
+                tl.cex = 6)  
 
-jpeg("04_figures/figures/figure6.jpg", width = 3, height = 3, units = "in", res = 600)
-print(b)
+# border passage by population 
+c <- ggplot(ensemble, aes(x = as.factor(year), y = med, fill = pops_f)) + 
+          geom_bar(stat = "identity",colour = "black", width=1) +
+          scale_fill_manual(values = c("#440154FF", "#277F8EFF","#46337EFF", "#365C8DFF", "#1FA187FF", "#4AC16DFF","#9FDA3AFF", "#FDE725FF")) +
+          geom_errorbar(data=ensemble, aes(x= as.factor(year), ymin= lwr_2.5, ymax=upr_97.5, width=.1)) +
+          xlab("Year") +
+          ylab("Border passage (000s)") +
+          coord_cartesian(ylim = c(0,40))+
+          scale_x_discrete(breaks = c("1984","1988","1992","1996","2000","2004","2008","2012","2016")) +
+          scale_y_continuous(position = "right") +
+          theme_bw() +
+          facet_wrap(~pops_f, ncol=2) +
+          theme(strip.text = element_text(size=6),
+                axis.text.x = element_text(angle=45, hjust=1),
+                axis.text = element_text(size=6),
+                axis.title = element_text(size=9),
+                legend.position = "none",
+                panel.grid.minor = element_blank())
+
+# combine three plots
+g <- ggarrange(ggarrange(a,b,nrow =2, labels = c("a", "b")),c,
+               ncol = 2, labels = c("","c"), hjust=0.7)
+
+jpeg("./04_figures/figures/figure4_new.jpeg", width = 6, height = 5, units = "in", res = 600)
+print(g)
 dev.off()
+
 
 # Figure 7: Age composition ----
 ASL$new_AGE <- as.numeric(ASL$new_AGE)
@@ -659,7 +660,7 @@ c <- ggplot(t3.3, aes(x=U*100, y=med_V2)) +
 g <- ggarrange(a,ggarrange(b,c,nrow =2, labels = c("b", "c")),
                ncol = 2, labels = c("a"))
 
-jpeg("./04_figures/figures/figure8.jpeg", width = 6, height = 6, units = "in", res = 600)
+jpeg("./04_figures/figures/figure8.jpeg", width = 6, height = 5, units = "in", res = 600)
 print(g)
 dev.off()
 
@@ -739,17 +740,7 @@ dev.off()
 
 # Figure 10: CV in run-size ----
 
-# Confirm Taylor's power law is met with our particular dataset
 
-Taylor_power <- ensemble%>%
-  group_by(population)%>%
-  summarize(mean_abund = mean(med*1000),
-            var_abund = var(med*1000))
-
-lm(log(Taylor_power$var_abund)~log(Taylor_power$mean_abund))
-
-plot(log(Taylor_power$var_abund)~log(Taylor_power$mean_abund),xlim=c())
-abline(lm(log(Taylor_power$var_abund)~log(Taylor_power$mean_abund)))
 
 indCVs <- matrix(NA,1000,8); colnames(indCVs)<-unique(spawn_df$population)
 for (i in unique(spawn_df$population)){
