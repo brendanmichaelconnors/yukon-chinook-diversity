@@ -33,7 +33,8 @@ setwd(here())
 counts <- read.csv("./02_run-reconstruction/data/borderCounts.csv")
 names(counts)[names(counts)=='count_type'] <- 'gear'
 counts$gear <- as.character(counts$gear)
-gsi <- read.csv('./02_run-reconstruction/data/gsiSamplesAllProbs.csv')
+gsi <- read.csv('./02_run-reconstruction/data/28Sep2021-update.gsiSamplesAllProbs.csv')
+#gsi <- read.csv('./02_run-reconstruction/data/gsiSamplesAllProbs.csv')
 #gsi <- read.csv('data/gsiSamples.csv')
 stockID <- read.csv('./02_run-reconstruction/data/stockIDs.csv') %>% arrange(plotOrder)
 stockID$stockNum <- stockID$plotOrder
