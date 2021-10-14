@@ -49,8 +49,8 @@ source("../fit-integrated-model/functions.R")
 
 # locations of samples
 post_dir = "../posterior-samples/"
-int_post_file = "integrated-posterior-paper.rds"
-sep_post_file = "single-pop-SS-SRA-posteriors.27Oct2020.RDS"
+int_post_file = "integrated-posterior.08Oct2021.RDS"
+sep_post_file = "single-pop-SS-SRA-posteriors.08Oct2021.RDS"
 ```
 
 ```{r new-functions}
