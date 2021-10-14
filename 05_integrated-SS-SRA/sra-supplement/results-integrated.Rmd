@@ -843,6 +843,8 @@ abline(h = 0, lwd = 2, lty = 3, col = "red")
 *The recruitment relationships from the integrated model suggested lower recruitment at a given escapement level. The posterior of the estimated relationships were also suggested to be more precise.*
 
 ```{r fig.width = 5, fig.height = 7}
+n_saved = lapply(post_list, post_dim, type = "saved")
+
 compare_sr_curve = function(stock, legend = T) {
   S_match = paste0("^S[.+,", stock, "]")
   alpha_match = paste0("^alpha\\[", stock, "\\]")
@@ -860,9 +862,8 @@ compare_sr_curve = function(stock, legend = T) {
     alpha * S * exp(-beta * S)
   }
   
-  
-  pred_R1 = t(sapply(1:10000, function(i) predict_R(pred_S, alpha_post[i,1], beta_post[i,1])))
-  pred_R2 = t(sapply(1:10000, function(i) predict_R(pred_S, alpha_post[i,2], beta_post[i,2])))
+  pred_R1 = t(sapply(1:n_saved[[1]], function(i) predict_R(pred_S, alpha_post[[1]][i,1], beta_post[[1]][i,1])))
+  pred_R2 = t(sapply(1:n_saved[[2]], function(i) predict_R(pred_S, alpha_post[[2]][i,1], beta_post[[2]][i,1])))
   
   pred_R1 = apply(pred_R1, 2, function(x) c(mean = mean(x), sd = sd(x), quantile(x, c(0.5, 0.025, 0.975))))
   pred_R2 = apply(pred_R2, 2, function(x) c(mean = mean(x), sd = sd(x), quantile(x, c(0.5, 0.025, 0.975))))
@@ -928,8 +929,8 @@ compare_sr_points = function(stock, legend = T) {
     alpha * S * exp(-beta * S)
   }
   
-  pred_R1 = t(sapply(1:10000, function(i) predict_R(pred_S, alpha_post[i,1], beta_post[i,1])))
-  pred_R2 = t(sapply(1:10000, function(i) predict_R(pred_S, alpha_post[i,2], beta_post[i,2])))
+  pred_R1 = t(sapply(1:n_saved[[1]], function(i) predict_R(pred_S, alpha_post[[1]][i,1], beta_post[[1]][i,1])))
+  pred_R2 = t(sapply(1:n_saved[[2]], function(i) predict_R(pred_S, alpha_post[[2]][i,1], beta_post[[2]][i,1])))
   
   pred_R1 = apply(pred_R1, 2, function(x) c(mean = mean(x), sd = sd(x), quantile(x, c(0.5, 0.025, 0.975))))
   pred_R2 = apply(pred_R2, 2, function(x) c(mean = mean(x), sd = sd(x), quantile(x, c(0.5, 0.025, 0.975))))
