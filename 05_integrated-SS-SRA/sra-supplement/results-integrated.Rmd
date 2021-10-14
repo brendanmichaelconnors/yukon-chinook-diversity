@@ -210,6 +210,11 @@ post_sep[,str_detect(colnames(post_sep), "^beta\\[")] = post_sep[,str_detect(col
 post_sep[,str_detect(colnames(post_sep), "^N\\[")] = post_sep[,str_detect(colnames(post_sep), "^N\\[")] * 1000
 post_sep[,str_detect(colnames(post_sep), "^S\\.msy\\[")] = post_sep[,str_detect(colnames(post_sep), "^S\\.msy\\[")] * 1000
 
+# correct the "ITER" column
+n_chains = max(post_sep[,"CHAIN"])
+iters_per_chain = nrow(post_sep)/n_chains
+post_sep[,"ITER"] = rep(1:iters_per_chain, n_chains)
+
 # coerce to mcmc.list
 post_sep = post_convert(post_sep)
 
