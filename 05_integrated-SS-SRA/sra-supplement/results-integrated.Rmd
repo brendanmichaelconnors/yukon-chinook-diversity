@@ -49,8 +49,8 @@ source("../fit-integrated-model/functions.R")
 
 # locations of samples
 post_dir = "../posterior-samples/"
-int_post_file = "integrated-posterior-paper.rds"
-sep_post_file = "single-pop-SS-SRA-posteriors.27Oct2020.RDS"
+int_post_file = "integrated-posterior.08Oct2021.RDS"
+sep_post_file = "single-pop-SS-SRA-posteriors.08Oct2021.RDS"
 ```
 
 ```{r new-functions}
@@ -209,6 +209,11 @@ post_sep[,str_detect(colnames(post_sep), "^R\\[")] = post_sep[,str_detect(colnam
 post_sep[,str_detect(colnames(post_sep), "^beta\\[")] = post_sep[,str_detect(colnames(post_sep), "^beta\\[")] / 1000
 post_sep[,str_detect(colnames(post_sep), "^N\\[")] = post_sep[,str_detect(colnames(post_sep), "^N\\[")] * 1000
 post_sep[,str_detect(colnames(post_sep), "^S\\.msy\\[")] = post_sep[,str_detect(colnames(post_sep), "^S\\.msy\\[")] * 1000
+
+# correct the "ITER" column
+n_chains = max(post_sep[,"CHAIN"])
+iters_per_chain = nrow(post_sep)/n_chains
+post_sep[,"ITER"] = rep(1:iters_per_chain, n_chains)
 
 # coerce to mcmc.list
 post_sep = post_convert(post_sep)
@@ -838,6 +843,8 @@ abline(h = 0, lwd = 2, lty = 3, col = "red")
 *The recruitment relationships from the integrated model suggested lower recruitment at a given escapement level. The posterior of the estimated relationships were also suggested to be more precise.*
 
 ```{r fig.width = 5, fig.height = 7}
+n_saved = lapply(post_list, post_dim, type = "saved")
+
 compare_sr_curve = function(stock, legend = T) {
   S_match = paste0("^S[.+,", stock, "]")
   alpha_match = paste0("^alpha\\[", stock, "\\]")
@@ -855,9 +862,8 @@ compare_sr_curve = function(stock, legend = T) {
     alpha * S * exp(-beta * S)
   }
   
-  
-  pred_R1 = t(sapply(1:10000, function(i) predict_R(pred_S, alpha_post[i,1], beta_post[i,1])))
-  pred_R2 = t(sapply(1:10000, function(i) predict_R(pred_S, alpha_post[i,2], beta_post[i,2])))
+  pred_R1 = t(sapply(1:n_saved[[1]], function(i) predict_R(pred_S, alpha_post[[1]][i,1], beta_post[[1]][i,1])))
+  pred_R2 = t(sapply(1:n_saved[[2]], function(i) predict_R(pred_S, alpha_post[[2]][i,1], beta_post[[2]][i,1])))
   
   pred_R1 = apply(pred_R1, 2, function(x) c(mean = mean(x), sd = sd(x), quantile(x, c(0.5, 0.025, 0.975))))
   pred_R2 = apply(pred_R2, 2, function(x) c(mean = mean(x), sd = sd(x), quantile(x, c(0.5, 0.025, 0.975))))
@@ -923,8 +929,8 @@ compare_sr_points = function(stock, legend = T) {
     alpha * S * exp(-beta * S)
   }
   
-  pred_R1 = t(sapply(1:10000, function(i) predict_R(pred_S, alpha_post[i,1], beta_post[i,1])))
-  pred_R2 = t(sapply(1:10000, function(i) predict_R(pred_S, alpha_post[i,2], beta_post[i,2])))
+  pred_R1 = t(sapply(1:n_saved[[1]], function(i) predict_R(pred_S, alpha_post[[1]][i,1], beta_post[[1]][i,1])))
+  pred_R2 = t(sapply(1:n_saved[[2]], function(i) predict_R(pred_S, alpha_post[[2]][i,1], beta_post[[2]][i,1])))
   
   pred_R1 = apply(pred_R1, 2, function(x) c(mean = mean(x), sd = sd(x), quantile(x, c(0.5, 0.025, 0.975))))
   pred_R2 = apply(pred_R2, 2, function(x) c(mean = mean(x), sd = sd(x), quantile(x, c(0.5, 0.025, 0.975))))
