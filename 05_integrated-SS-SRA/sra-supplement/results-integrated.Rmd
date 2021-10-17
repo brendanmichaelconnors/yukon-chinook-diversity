@@ -49,8 +49,8 @@ source("../fit-integrated-model/functions.R")
 
 # locations of samples
 post_dir = "../posterior-samples/"
-int_post_file = "integrated-posterior.08Oct2021.RDS"
-sep_post_file = "single-pop-SS-SRA-posteriors.08Oct2021.RDS"
+int_post_file = "integrated-posterior.rds"
+sep_post_file = "seperated-posterior.rds"
 ```
 
 ```{r new-functions}
@@ -862,8 +862,11 @@ compare_sr_curve = function(stock, legend = T) {
     alpha * S * exp(-beta * S)
   }
   
-  pred_R1 = t(sapply(1:n_saved[[1]], function(i) predict_R(pred_S, alpha_post[[1]][i,1], beta_post[[1]][i,1])))
-  pred_R2 = t(sapply(1:n_saved[[2]], function(i) predict_R(pred_S, alpha_post[[2]][i,1], beta_post[[2]][i,1])))
+  #pred_R1 = t(sapply(1:n_saved[[1]], function(i) predict_R(pred_S, alpha_post[[1]][i,1], beta_post[[1]][i,1])))
+  #pred_R2 = t(sapply(1:n_saved[[2]], function(i) predict_R(pred_S, alpha_post[[2]][i,1], beta_post[[2]][i,1])))
+  
+  pred_R1 = t(sapply(1:n_saved[[1]], function(i) predict_R(pred_S, alpha_post[i,1], beta_post[i,1])))
+  pred_R2 = t(sapply(1:n_saved[[2]], function(i) predict_R(pred_S, alpha_post[i,2], beta_post[i,2])))
   
   pred_R1 = apply(pred_R1, 2, function(x) c(mean = mean(x), sd = sd(x), quantile(x, c(0.5, 0.025, 0.975))))
   pred_R2 = apply(pred_R2, 2, function(x) c(mean = mean(x), sd = sd(x), quantile(x, c(0.5, 0.025, 0.975))))
@@ -929,8 +932,11 @@ compare_sr_points = function(stock, legend = T) {
     alpha * S * exp(-beta * S)
   }
   
-  pred_R1 = t(sapply(1:n_saved[[1]], function(i) predict_R(pred_S, alpha_post[[1]][i,1], beta_post[[1]][i,1])))
-  pred_R2 = t(sapply(1:n_saved[[2]], function(i) predict_R(pred_S, alpha_post[[2]][i,1], beta_post[[2]][i,1])))
+  #pred_R1 = t(sapply(1:n_saved[[1]], function(i) predict_R(pred_S, alpha_post[[1]][i,1], beta_post[[1]][i,1])))
+  #pred_R2 = t(sapply(1:n_saved[[2]], function(i) predict_R(pred_S, alpha_post[[2]][i,1], beta_post[[2]][i,1])))
+
+  pred_R1 = t(sapply(1:n_saved[[1]], function(i) predict_R(pred_S, alpha_post[i,1], beta_post[i,1])))
+  pred_R2 = t(sapply(1:n_saved[[2]], function(i) predict_R(pred_S, alpha_post[i,2], beta_post[i,2])))
   
   pred_R1 = apply(pred_R1, 2, function(x) c(mean = mean(x), sd = sd(x), quantile(x, c(0.5, 0.025, 0.975))))
   pred_R2 = apply(pred_R2, 2, function(x) c(mean = mean(x), sd = sd(x), quantile(x, c(0.5, 0.025, 0.975))))

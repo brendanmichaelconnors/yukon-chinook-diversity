@@ -39,7 +39,7 @@ source("../fit-integrated-model/functions.R")
 
 ```{r load posterior samples, message = F}
 # load in the posterior samples
-post = readRDS(file = "../posterior-samples/single-pop-SS-SRA-posteriors.08Oct2021.RDS")
+post = readRDS(file = "../posterior-samples/seperated-posterior.rds")
 
 # fix variable names: some one-dimensional objects have two dimensions in variable name
 colnames(post)[colnames(post) %in% paste0("alpha[1,", 1:8, "]")] = paste0("alpha[", 1:8, "]")
