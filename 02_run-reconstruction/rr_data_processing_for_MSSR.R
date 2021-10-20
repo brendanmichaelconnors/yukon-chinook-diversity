@@ -21,22 +21,11 @@ rr_modAll$sd <- rr_modAll[,8] # approximate SD of border passage
 
 xx <- merge(rr_modAll,stockIds,by="stock")
 
-RR_output <- arrange(xx,id_MSSR,year)
+RR_output <- arrange(xx,id_SRA,year)
 
 agg_data <- subset(agg_data, year>1984 & year <2020)
 
 CDN_u <- agg_data$yk_rv_har/(agg_data$spwn+agg_data$yk_rv_har)# CDN exploitation rate
-
-# --- Order of populations -----------------------------------------------------------
-
-# 1. Lower Mainstem
-# 2. White-Donjek
-# 3. Pelly
-# 4. Stewart
-# 5. Carmacks
-# 6. Teslin
-# 7. Middle Mainstem
-# 8. Upper Lakes and Mainstem
 
 # --- set values for list --------------------------------------------------------------
   ns <- 8
@@ -97,5 +86,71 @@ Yukon_chinook_data_for_BS_ScenAA.RR <- list("ns" = ns,
                                 "R_wish" = R_wish, 
                                 "df_wish" = df_wish) 
 
-saveRDS(Yukon_chinook_data_for_BS_ScenAA.RR,"./02_run-reconstruction/rr_outputs/Yukon_data_for_BS_ScenENSEMBLE_w_pop_age_cpms.RR_14Oct2020.RDS")
+saveRDS(Yukon_chinook_data_for_BS_ScenAA.RR,"./02_run-reconstruction/rr_outputs/Yukon_data_for_SS_SRA.RDS")
+
+# --- create new outputs for MS-SRA --------------------------------------------------------------------
+esc_data <- matrix(NA,280,8)
+esc_data <- as.data.frame(esc_data)
+colnames(esc_data) <- c("stock","year","mean","sd","lwr95CI","upr95CI","cv","obs")
+esc_data[,1] <- c(rep("LwrMain",35),
+                  rep("Stewart",35),
+                  rep("Pelly",35),
+                  rep("White-Donjek",35),
+                  rep("MidMain",35),
+                  rep("Carmacks",35),
+                  rep("UprLksMain",35),
+                  rep("Teslin",35))
+
+esc_data[,2] <- rep(1985:2019,times=8)
+esc_data[,3] <- S_obs
+esc_data[,4] <- tau_S_obs
+esc_data[,5] <- round(RR_output$X2.5.*(1-rep(CDN_u,8)),0)
+esc_data[,6] <- round(RR_output$X97.5.*(1-rep(CDN_u,8)),0)
+esc_data[,7] <- tau_S_obs/S_obs
+esc_data[,8] <- rep(1,280)
+
+write_csv(esc_data,"./05_integrated-SS-SRA/fit-integrated-model/inputs/esc-data.csv")  
+
+
+age_data <- matrix(NA,315,7)
+age_data <- as.data.frame(age_data)
+colnames(age_data) <- c("stock","year","a4","a5","a6","a7","n")
+
+age_data[,1] <- c(rep("aggregate",35),
+                  rep("LwrMain",35),
+                  rep("Stewart",35),
+                  rep("Pelly",35),
+                  rep("White-Donjek",35),
+                  rep("MidMain",35),
+                  rep("Carmacks",35),
+                  rep("UprLksMain",35),
+                  rep("Teslin",35))
+
+age_data[,3:6] <- rbind(x_tas_obs_agg,
+                              x_tas_obs[,,1],
+                              x_tas_obs[,,2],
+                              x_tas_obs[,,3],
+                              x_tas_obs[,,4],
+                              x_tas_obs[,,5],
+                              x_tas_obs[,,6],
+                              x_tas_obs[,,7],
+                              x_tas_obs[,,8])
+
+age_data[,7] <- rowSums(age_data[,3:6])
+
+write_csv(age_data,"./05_integrated-SS-SRA/fit-integrated-model/inputs/age-data.csv")  
+
+
+catch_data <- matrix(NA,35,7)
+catch_data <- as.data.frame(catch_data)
+colnames(catch_data) <- c("year","mean","sd","median","lwr95CI","upr95CI","cv")
+catch_data[,1] <- rep(1985:2019)
+catch_data[,2] <- C_tot_t_obs
+catch_data[,3] <- round(C_tot_t_obs*0.10)
+catch_data[,4] <- C_tot_t_obs
+catch_data[,5] <- C_tot_t_obs-(2*catch_data[,3])
+catch_data[,6] <- C_tot_t_obs+(2*catch_data[,3])
+catch_data[,7] <- catch_data[,3]/C_tot_t_obs
+
+write_csv(catch_data,"./05_integrated-SS-SRA/fit-integrated-model/inputs/catch-data.csv")  
 

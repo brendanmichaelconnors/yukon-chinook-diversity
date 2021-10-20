@@ -6,12 +6,12 @@
 
 # load data/outputs ----
 border_passage <- read.csv("01_inputs/data/borderCounts.csv") # border passage
-gsi <- read.csv("01_inputs/data/gsiSamplesAllProbs.csv") # GSI samples
+gsi <- read.csv("01_inputs/data/20Oct2021-update.gsiSamplesAllProbs.csv") # GSI samples
 ASL <- read.csv("01_inputs/data/ASL_GSI_modified.csv") # ASL data
 jtc <- read.csv("01_inputs/data/jtc_age_and_harvest_data.csv") # aggregate JTC age comp data and CDN harvest rate
 ensemble <- read.csv("./02_run-reconstruction/rr_outputs/ensemble.csv") # ensemble run-reconstruction output
 RR <-load("./02_run-reconstruction/rr_outputs/rpt.fullCor.Rdata") # fully estimated var-covar run-reconstruction model output
-SSSR <- readRDS("./01_inputs/posteriors/27-Oct-2020_SS-SRA-posteriors-10k-unifBeta-scenEnsble.RDS") # posterior samples from SS-SRA models
+SSSR <- readRDS("./01_inputs/posteriors/single-pop-SS-SRA-posteriors.RDS") # posterior samples from SS-SRA models
 
 # pre-process data ----
 pop_colors <- viridis(8)
@@ -405,7 +405,7 @@ g <- ggplot() +
   geom_text(data = a, 
             mapping = aes(x = 237, y = -0.5, label = year_count, hjust = 1, vjust = 2),
             size=3, color = "red")
-jpeg("04_figures/figures/figure3.jpeg", width = 6, height = 8, units = "in", res = 600)
+jpeg("04_figures/figures/figureS1.jpeg", width = 6, height = 8, units = "in", res = 600)
 print(g)
 dev.off()
 
@@ -767,7 +767,9 @@ CV.long$pop <- factor(CV.long$pop, levels = c("Aggregate","Lower Mainstem","Whit
                                               "Carmacks","Upper Lakes and Mainstem","Teslin"))
 weights <- ensemble%>%
   group_by(population)%>%
-  summarize(weights = sum(med)/2.292)
+  summarize(sum_size = sum(med))%>%
+  mutate(weights = sum_size / sum(sum_size))
+
 
 var_damp <- matrix(NA,1000,1)
 for(i in 1:1000){
@@ -837,7 +839,7 @@ b <- ggplot(data = rt_cvs, aes(x = Year, y = CV, color=Location)) +
   geom_line(size=1.2) +
   ylab("CV in run size") +
   scale_color_grey(start=0.8, end=0.2) +
-  scale_y_continuous(breaks = c(0,0.15,0.3,0.45,0.6), limits=c(0,0.6),position = "right") +
+  scale_y_continuous(breaks = c(0,0.15,0.3,0.45,0.6,0.75), limits=c(0,0.8),position = "right") +
   theme_bw() +
   theme(axis.title = element_text(size=9),
         axis.text.x = element_text(angle=45, hjust = 1, size=7),
@@ -845,7 +847,7 @@ b <- ggplot(data = rt_cvs, aes(x = Year, y = CV, color=Location)) +
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         legend.justification = c(0,0),
-        legend.position = c(0.52,0.1),
+        legend.position = c(0.52,0.07),
         legend.key.size = unit(7, "pt"),
         legend.background = element_blank(),
         legend.text = element_text(size = 7),

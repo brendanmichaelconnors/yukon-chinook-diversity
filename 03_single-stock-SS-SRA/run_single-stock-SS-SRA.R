@@ -3,17 +3,18 @@
 #
 # fit single stock state-spave spawner-recruitment models
 # ------------------------------------------------------------------------------------- #
-input_data <- readRDS("./02_run-reconstruction/rr_outputs/Yukon_data_for_BS_ScenENSEMBLE_w_pop_age_cpms.RR_14Oct2020.RDS")
+input_data <- readRDS("./02_run-reconstruction/rr_outputs/Yukon_data_for_SS_SRA.RDS")
 age_and_harvest <- read.csv("./01_inputs/data/jtc_age_and_harvest_data.csv")
 
 stock <- c("LowerMainstem",
-           "WhiteDonjek",
-           "Pelly",
            "Stewart",
-           "Carmacks",
-           "Teslin",
+           "Pelly",
+           "WhiteDonjek",
            "MiddleMainstem",
-           "UpperLakesAndMainstem")
+           "Carmacks",
+           "UpperLakesAndMainstem",
+           "Teslin")
+           
 
 # prepare age data (age)
 age <- input_data$x_tas_obs_agg/100
@@ -74,12 +75,28 @@ for(i in populations){
                   esc = esc, 
                   har = harv)
   
-  out <- as.mcmc(out)
-  posteriors[,,i] <- as.matrix(out, chain=F)
+  out.mcmc <- as.mcmc(out)
+  posteriors[,,i] <- as.matrix(out.mcmc, chain=FALSE)
   
 }
 
-colnames(posteriors) <- colnames(out)
-
-saveRDS(posteriors,"./01_inputs/posteriors/27-Oct-2020_SS-SRA-posteriors-10k-unifBeta-scenEnsble.RDS")  
+# 3-D array for main text figures
 # dimensions are: posterior samples X parameters X population
+saveRDS(posteriors,"./01_inputs/posteriors/single-pop-SS-SRA-posteriors.RDS")  
+
+
+# 2-D matrix for supplement B
+supp_B_post <- cbind(c(seq(1,2000),seq(1,2000),seq(1,2000),seq(1,2000),seq(1,2000)),
+                     c(rep(1,2000),rep(2,2000),rep(3,2000),rep(4,2000),rep(5,2000)), 
+                     posteriors[,,1],
+                     posteriors[,,2],
+                     posteriors[,,3],
+                     posteriors[,,4],
+                     posteriors[,,5],
+                     posteriors[,,6],
+                     posteriors[,,7],
+                     posteriors[,,8])
+
+colnames(supp_B_post) <-c("ITER", "CHAIN",pop_1,pop_2,pop_3,pop_4,pop_5,pop_6,pop_7,pop_8)
+
+saveRDS(supp_B_post,"./05_integrated-SS-SRA/posterior-samples/seperated-posterior.RDS")  
