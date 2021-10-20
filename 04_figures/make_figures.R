@@ -192,12 +192,12 @@ alphabeta_df2_summ <- alphabeta_df %>%
 # create vector of abundances for each dataframe
 sp_YC <- as.vector(seq(0,20,length.out=1000))
 sp_YlC <- as.vector(seq(0,20,length.out=1000))
-sp_Ym <- as.vector(seq(0,35,length.out=1000))
+sp_Ym <- as.vector(seq(0,40,length.out=1000))
 sp_YP <- as.vector(seq(0,25,length.out=1000))
 sp_YS <- as.vector(seq(0,25,length.out=1000))
 sp_YT <- as.vector(seq(0,25,length.out=1000))
-sp_Yu <- as.vector(seq(0,15,length.out=1000))
-sp_YWD <- as.vector(seq(0,15,length.out=1000))
+sp_Yu <- as.vector(seq(0,20,length.out=1000))
+sp_YWD <- as.vector(seq(0,13,length.out=1000))
 
 # repeat substock abundance vector 1000 times for each value of alpha and beta
 spw_YC <- rep(c(sp_YC),(1000))
@@ -287,130 +287,8 @@ RS_df2$population <- factor(RS_df2$population, levels = c("Lower Mainstem","Whit
                                                           "Carmacks","Upper Lakes and Mainstem","Teslin"))
 
 
-# Figure S1: border passage and GSI samples -----
-bc <- border_passage %>%
-  drop_na(count) %>%
-  group_by(year, count_type) %>%
-  mutate(year_count = sum(count)) %>%
-  mutate(max_count = max(count)) %>%
-  ungroup() %>%
-  mutate(prop = (count/year_count)) %>%
-  mutate(prop2 = (count/max_count)) %>%
-  mutate(year_gear = paste0(year,"_",count_type)) %>%
-  filter(year_gear %not_in% c("2005_fishWheel","2006_fishWheel","2007_fishWheel")) %>%
-  filter(year %not_in% c("1988","1989","1990","1998")) %>%
-  as.data.frame()
 
-gsi.prop <- gsi %>%
-  mutate(year_gear = paste0(year,"_",gear)) %>%
-  filter(year_gear %not_in% c("2008_Fish Wheel","2010_Fish Wheel","2011_Fish Wheel","2012_Fish Wheel")) %>%
-  group_by(year, sample_num) %>%
-  filter(prob == max(prob)) %>%
-  ungroup() %>%
-  group_by(year_gear) %>%
-  mutate(total_count = n()) %>%
-  ungroup() %>%
-  group_by(year_gear, region_name) %>%
-  mutate(pop_count = n(),
-         pop_prop = (pop_count/total_count)*100) %>%
-  ungroup() %>%
-  distinct(year, region_name, pop_prop) %>%
-  spread(key=region_name, pop_prop) %>%
-  as.data.frame()
-
-gsi.count <- gsi %>%
-  mutate(year_gear = paste0(year,"_",gear)) %>%
-  filter(year_gear %not_in% c("2008_Fish Wheel","2010_Fish Wheel","2011_Fish Wheel","2012_Fish Wheel")) %>%
-  group_by(year, sample_num) %>%
-  filter(prob == max(prob)) %>%
-  ungroup() %>%
-  group_by(year_gear) %>%
-  mutate(total_count = n()) %>%
-  ungroup() %>%
-  group_by(year_gear, region_name) %>%
-  mutate(pop_count = n(),
-         pop_prop = (pop_count/total_count)*100) %>%
-  ungroup() %>%
-  distinct(year, region_name, pop_count) %>%
-  spread(key=region_name, pop_count) %>%
-  as.data.frame()
-
-gsi.join <- full_join(gsi.count, gsi.prop) %>% 
-  dplyr::select(1, 3, 6, 5, 9, 4, 2, 8, 7) %>%
-  as.data.frame()
-#write.csv(gsi.join, file = "gsi.count.csv")
-
-gsi %>% 
-  group_by(year, sample_num) %>%
-  filter(prob == max(prob)) %>% 
-  ungroup() %>%
-  group_by(year) %>%
-  summarise(med = median(prob)) %>% 
-  ungroup() %>%
-  mutate(max = max(med),
-         min = min(med)) %>%
-  summarise(quants = quantile(med, probs = c(0.05, 0.5, 0.95))) %>%
-  as.data.frame()
-  
-gsi2 <- gsi %>%
-  mutate(year_gear = paste0(year,"_",gear)) %>%
-  filter(year_gear %not_in% c("2008_Fish Wheel","2010_Fish Wheel","2011_Fish Wheel","2012_Fish Wheel")) %>%
-  group_by(year, sample_num) %>%
-  filter(prob == max(prob)) %>%
-  ungroup() %>%
-  group_by(year) %>%
-  mutate(year_count = n()) %>%
-  ungroup() %>%
-  group_by(year, julian) %>%
-  mutate(julian_count = n()) %>%
-  ungroup() %>%
-  group_by(year) %>%
-  mutate(max_count = max(julian_count)) %>%
-  ungroup() %>%
-  mutate(julian_prop = (julian_count/year_count)) %>%
-  mutate(julian_prop2 = (julian_count/max_count)) %>%
-  distinct(year, year_count, julian, julian_prop,julian_prop2) %>%
-  as.data.frame()
-
-gsi2 %>% distinct(year, gear) %>% arrange(gear, year)
-bc %>% distinct(year, count_type) %>% arrange(count_type, year)
-bc %>% group_by(year) %>% summarise(sum = sum(prop)) %>% as.data.frame()
-gsi2 %>% group_by(year) %>% summarise(sum = sum(julian_prop)) %>% as.data.frame()
-
-a <- gsi2 %>% distinct(year, year_count) %>% arrange(year) %>% 
-  mutate(xpos = 200,
-         ypos = 0,
-         vjustvar = 0) %>%
-  as.data.frame()
-
-g <- ggplot() +
-  geom_vline(xintercept=c(180,210,240), color="light grey",lwd=0.25,lty=2) +
-  geom_bar(data = bc, aes(x=as.numeric(julian), y=prop2),stat = "identity") +
-  geom_bar(data = gsi2, aes(x=as.numeric(julian), y=(julian_prop2)*-1), 
-           fill="red", alpha=0.85, stat = "identity") +
-  scale_x_continuous(limits=c(175,250), breaks = c(180,210,240)) +
-  xlab("Day of year") +
-  ylab("Run and GSI sample sizes") +
-  facet_wrap(~year, scales = "free_y") +
-  theme_bw() +
-  theme(axis.text.x = element_text(size=8, angle = 45, hjust = 1),
-        strip.text = element_text(size=9),
-        axis.text.y = element_blank(),
-        axis.ticks.y = element_blank(),
-        aspect.ratio=1,
-        panel.spacing.x=unit(0.1, "lines"),
-        panel.spacing.y=unit(0.3, "lines"),
-        panel.grid.minor = element_blank(),
-        panel.grid.major = element_blank())+
-  geom_text(data = a, 
-            mapping = aes(x = 237, y = -0.5, label = year_count, hjust = 1, vjust = 2),
-            size=3, color = "red")
-jpeg("04_figures/figures/figureS1.jpeg", width = 6, height = 8, units = "in", res = 600)
-print(g)
-dev.off()
-
-
-# Figure 4: multi-panel daily border passage + corr run-timing + annual border passage ----
+# Figure 3: multi-panel daily border passage + corr run-timing + annual border passage ----
 
 # daily border passage
 load("./02_run-reconstruction/rr_outputs/rpt.fullCor.Rdata")
@@ -486,83 +364,7 @@ c <- ggplot(ensemble, aes(x = as.factor(year), y = med, fill = pops_f)) +
 g <- ggarrange(ggarrange(a,b,nrow =2, labels = c("a", "b")),c,
                ncol = 2, labels = c("","c"), hjust=0.7)
 
-jpeg("./04_figures/figures/figure4_new.jpeg", width = 6, height = 5, units = "in", res = 600)
-print(g)
-dev.off()
-
-
-# Figure 7: Age composition ----
-ASL$new_AGE <- as.numeric(ASL$new_AGE)
-
-data <- ASL %>% 
-  mutate(year_gear = paste0(year,"_",gear)) %>%
-  filter(year_gear %not_in% c("2008_Fish Wheel","2010_Fish Wheel","2011_Fish Wheel","2012_Fish Wheel")) %>%
-  drop_na(new_AGE) %>%
-  group_by(gear, year, sample_num) %>%
-  filter(prob == max(prob)) %>%
-  ungroup() %>%
-  mutate(new_AGE = case_when(new_AGE == 8 ~ 7,
-                             new_AGE == 3 ~ 4,
-                             new_AGE %in% c(4,5,6,7) ~ new_AGE)) %>%
-  group_by(gear, year, region_name) %>%
-  mutate(count = n()) %>%
-  ungroup() %>%
-  group_by(gear, year, new_AGE, region_name) %>%
-  mutate(age_count = n()) %>%
-  ungroup() %>%
-  mutate(age_prop = age_count/count) %>%
-  dplyr::select(year, gear, region_name, new_AGE, count, age_count, age_prop) %>%
-  arrange(gear, region_name, new_AGE, year) %>%
-  mutate(Population = case_when(region_name == "Yukon Carmacks" ~ "Carmacks",
-                                region_name == "Yukon Lower Canadian" ~ "Lower Mainstem",
-                                region_name == "Yukon mainstem" ~ "Middle Mainstem",
-                                region_name == "Yukon Pelly" ~ "Pelly",
-                                region_name == "Yukon Stewart" ~ "Stewart",
-                                region_name == "Yukon upper" ~ "Upper Lakes and Mainstem",
-                                region_name == "Yukon White-Donjek" ~ "White-Donjek",
-                                region_name == "Yukon Teslin" ~ "Teslin")) %>%
-  rename(Fish.Age = new_AGE) %>%
-  as.data.frame()
-
-data$Fish.Age <- as.factor(data$Fish.Age)
-
-jtc2 <- jtc %>%
-  dplyr::select(year, age_4, age_5, age_6, age_7) %>%
-  gather(age, age_prop, age_4:age_7) %>%
-  mutate(Population = "Aggregate") %>%
-  mutate(Fish.Age = case_when(age == "age_4" ~ "4",
-                              age == "age_5" ~ "5",
-                              age == "age_6" ~ "6",
-                              age == "age_7" ~ "7")) %>%
-  dplyr::select(year, Population, Fish.Age, age_prop) %>%
-  as.data.frame()
-
-data2 <- full_join(data, jtc2) %>% arrange(year) %>% as.data.frame()
-
-data2$Population <- factor(data2$Population, levels = c("Lower Mainstem","White-Donjek","Stewart","Pelly",
-                                                        "Middle Mainstem","Carmacks","Upper Lakes and Mainstem","Teslin","Aggregate"))
-
-g <- ggplot(data2, aes(x=year, y=age_prop, fill=Fish.Age)) +
-  geom_bar(stat= "identity", position = "fill") +
-  scale_x_continuous(limits = c(1985,2018), breaks = seq(1985,2020,5)) +
-  scale_fill_viridis(option = "viridis", discrete = TRUE) +
-  xlab("Year") +
-  ylab("Proportion") +
-  facet_wrap(~Population) +
-  labs(fill="Age class")+
-  theme_bw() +
-  theme(axis.text.x = element_text(angle=45, hjust = 1, vjust=1, size=6),
-      strip.text = element_text(size=6),
-      axis.title = element_text(size=9),
-      axis.text = element_text(size=6),
-      legend.key.size = unit(10, "pt"),
-      legend.background = element_blank(),
-      legend.text = element_text(size = 7),
-      legend.title = element_text(size = 9),
-      panel.grid.minor = element_blank())
-
-
-jpeg("04_figures/figures/figure7.jpeg", width = 6, height = 5, units = "in", res = 200)
+jpeg("./04_figures/figures/figure3.jpeg", width = 6, height = 5, units = "in", res = 600)
 print(g)
 dev.off()
 
@@ -570,7 +372,7 @@ dev.off()
 
 source("./04_figures/tradeoffs.R")
 
-# Figure 8: spawner-recruit ----
+# Figure 4: spawner-recruit ----
 
 a <- ggplot() +
   geom_ribbon(data = alphabeta_df3_perc, aes(x = abund, ymin = q_05, ymax = q_95), 
@@ -660,11 +462,11 @@ c <- ggplot(t3.3, aes(x=U*100, y=med_V2)) +
 g <- ggarrange(a,ggarrange(b,c,nrow =2, labels = c("b", "c")),
                ncol = 2, labels = c("a"))
 
-jpeg("./04_figures/figures/figure8.jpeg", width = 6, height = 5, units = "in", res = 600)
+jpeg("./04_figures/figures/figure4.jpeg", width = 6, height = 6, units = "in", res = 600)
 print(g)
 dev.off()
 
-# Figure 9: multi-panel productivity correlation ----
+# Figure 5: multi-panel productivity correlation ----
 logresid_perc_scale$population <- factor(logresid_perc_scale$population, levels = c("Lower Mainstem","White-Donjek","Stewart","Pelly",
                                                                                     "Middle Mainstem",
                                                                                     "Carmacks","Upper Lakes and Mainstem","Teslin"))
@@ -734,13 +536,11 @@ c <- ggplot(data = phis.long, aes(x = pop, y = phi, fill=pop)) +
 g <- ggarrange(a,ggarrange(b,c,nrow =2, labels = c("b", "c")),
                ncol = 2, labels = c("a"))
 
-jpeg("./04_figures/figures/figure9.jpeg", width = 6, height = 5, units = "in", res = 600)
+jpeg("./04_figures/figures/figure5.jpeg", width = 6, height = 5, units = "in", res = 600)
 print(g)
 dev.off()
 
-# Figure 10: CV in run-size ----
-
-
+# Figure 6: CV in run-size ----
 
 indCVs <- matrix(NA,1000,8); colnames(indCVs)<-unique(spawn_df$population)
 for (i in unique(spawn_df$population)){
@@ -839,7 +639,7 @@ b <- ggplot(data = rt_cvs, aes(x = Year, y = CV, color=Location)) +
   geom_line(size=1.2) +
   ylab("CV in run size") +
   scale_color_grey(start=0.8, end=0.2) +
-  scale_y_continuous(breaks = c(0,0.15,0.3,0.45,0.6,0.75), limits=c(0,0.8),position = "right") +
+  scale_y_continuous(breaks = c(0,0.15,0.3,0.45,0.6,0.75), limits=c(0,0.85),position = "right") +
   theme_bw() +
   theme(axis.title = element_text(size=9),
         axis.text.x = element_text(angle=45, hjust = 1, size=7),
@@ -847,7 +647,7 @@ b <- ggplot(data = rt_cvs, aes(x = Year, y = CV, color=Location)) +
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         legend.justification = c(0,0),
-        legend.position = c(0.52,0.07),
+        legend.position = c(0.52,0.05),
         legend.key.size = unit(7, "pt"),
         legend.background = element_blank(),
         legend.text = element_text(size = 7),
@@ -856,6 +656,204 @@ b <- ggplot(data = rt_cvs, aes(x = Year, y = CV, color=Location)) +
 
 g <- ggarrange(a,b, labels = c("a", "b"),widths = c(1.3, 1), ncol = 2)
 
-jpeg("./04_figures/figures/figure10.jpeg", width = 6, height = 2.5, units = "in", res = 600)
+jpeg("./04_figures/figures/figure6.jpeg", width = 6, height = 2.5, units = "in", res = 600)
+print(g)
+dev.off()
+
+# Figure S1: border passage and GSI samples -----
+bc <- border_passage %>%
+  drop_na(count) %>%
+  group_by(year, count_type) %>%
+  mutate(year_count = sum(count)) %>%
+  mutate(max_count = max(count)) %>%
+  ungroup() %>%
+  mutate(prop = (count/year_count)) %>%
+  mutate(prop2 = (count/max_count)) %>%
+  mutate(year_gear = paste0(year,"_",count_type)) %>%
+  filter(year_gear %not_in% c("2005_fishWheel","2006_fishWheel","2007_fishWheel")) %>%
+  filter(year %not_in% c("1988","1989","1990","1998")) %>%
+  as.data.frame()
+
+gsi.prop <- gsi %>%
+  mutate(year_gear = paste0(year,"_",gear)) %>%
+  filter(year_gear %not_in% c("2008_Fish Wheel","2010_Fish Wheel","2011_Fish Wheel","2012_Fish Wheel")) %>%
+  group_by(year, sample_num) %>%
+  filter(prob == max(prob)) %>%
+  ungroup() %>%
+  group_by(year_gear) %>%
+  mutate(total_count = n()) %>%
+  ungroup() %>%
+  group_by(year_gear, region_name) %>%
+  mutate(pop_count = n(),
+         pop_prop = (pop_count/total_count)*100) %>%
+  ungroup() %>%
+  distinct(year, region_name, pop_prop) %>%
+  spread(key=region_name, pop_prop) %>%
+  as.data.frame()
+
+gsi.count <- gsi %>%
+  mutate(year_gear = paste0(year,"_",gear)) %>%
+  filter(year_gear %not_in% c("2008_Fish Wheel","2010_Fish Wheel","2011_Fish Wheel","2012_Fish Wheel")) %>%
+  group_by(year, sample_num) %>%
+  filter(prob == max(prob)) %>%
+  ungroup() %>%
+  group_by(year_gear) %>%
+  mutate(total_count = n()) %>%
+  ungroup() %>%
+  group_by(year_gear, region_name) %>%
+  mutate(pop_count = n(),
+         pop_prop = (pop_count/total_count)*100) %>%
+  ungroup() %>%
+  distinct(year, region_name, pop_count) %>%
+  spread(key=region_name, pop_count) %>%
+  as.data.frame()
+
+gsi.join <- full_join(gsi.count, gsi.prop) %>% 
+  dplyr::select(1, 3, 6, 5, 9, 4, 2, 8, 7) %>%
+  as.data.frame()
+#write.csv(gsi.join, file = "gsi.count.csv")
+
+gsi %>% 
+  group_by(year, sample_num) %>%
+  filter(prob == max(prob)) %>% 
+  ungroup() %>%
+  group_by(year) %>%
+  summarise(med = median(prob)) %>% 
+  ungroup() %>%
+  mutate(max = max(med),
+         min = min(med)) %>%
+  summarise(quants = quantile(med, probs = c(0.05, 0.5, 0.95))) %>%
+  as.data.frame()
+
+gsi2 <- gsi %>%
+  mutate(year_gear = paste0(year,"_",gear)) %>%
+  filter(year_gear %not_in% c("2008_Fish Wheel","2010_Fish Wheel","2011_Fish Wheel","2012_Fish Wheel")) %>%
+  group_by(year, sample_num) %>%
+  filter(prob == max(prob)) %>%
+  ungroup() %>%
+  group_by(year) %>%
+  mutate(year_count = n()) %>%
+  ungroup() %>%
+  group_by(year, julian) %>%
+  mutate(julian_count = n()) %>%
+  ungroup() %>%
+  group_by(year) %>%
+  mutate(max_count = max(julian_count)) %>%
+  ungroup() %>%
+  mutate(julian_prop = (julian_count/year_count)) %>%
+  mutate(julian_prop2 = (julian_count/max_count)) %>%
+  distinct(year, year_count, julian, julian_prop,julian_prop2) %>%
+  as.data.frame()
+
+gsi2 %>% distinct(year, gear) %>% arrange(gear, year)
+bc %>% distinct(year, count_type) %>% arrange(count_type, year)
+bc %>% group_by(year) %>% summarise(sum = sum(prop)) %>% as.data.frame()
+gsi2 %>% group_by(year) %>% summarise(sum = sum(julian_prop)) %>% as.data.frame()
+
+a <- gsi2 %>% distinct(year, year_count) %>% arrange(year) %>% 
+  mutate(xpos = 200,
+         ypos = 0,
+         vjustvar = 0) %>%
+  as.data.frame()
+
+g <- ggplot() +
+  geom_vline(xintercept=c(180,210,240), color="light grey",lwd=0.25,lty=2) +
+  geom_bar(data = bc, aes(x=as.numeric(julian), y=prop2),stat = "identity") +
+  geom_bar(data = gsi2, aes(x=as.numeric(julian), y=(julian_prop2)*-1), 
+           fill="red", alpha=0.85, stat = "identity") +
+  scale_x_continuous(limits=c(175,250), breaks = c(180,210,240)) +
+  xlab("Day of year") +
+  ylab("Run and GSI sample sizes") +
+  facet_wrap(~year, scales = "free_y") +
+  theme_bw() +
+  theme(axis.text.x = element_text(size=8, angle = 45, hjust = 1),
+        strip.text = element_text(size=9),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        aspect.ratio=1,
+        panel.spacing.x=unit(0.1, "lines"),
+        panel.spacing.y=unit(0.3, "lines"),
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank())+
+  geom_text(data = a, 
+            mapping = aes(x = 237, y = -0.5, label = year_count, hjust = 1, vjust = 2),
+            size=3, color = "red")
+jpeg("04_figures/figures/figureS1.jpeg", width = 6, height = 8, units = "in", res = 600)
+print(g)
+dev.off()
+
+
+# Figure S11: Age composition ----
+ASL$new_AGE <- as.numeric(ASL$new_AGE)
+
+data <- ASL %>% 
+  mutate(year_gear = paste0(year,"_",gear)) %>%
+  filter(year_gear %not_in% c("2008_Fish Wheel","2010_Fish Wheel","2011_Fish Wheel","2012_Fish Wheel")) %>%
+  drop_na(new_AGE) %>%
+  group_by(gear, year, sample_num) %>%
+  filter(prob == max(prob)) %>%
+  ungroup() %>%
+  mutate(new_AGE = case_when(new_AGE == 8 ~ 7,
+                             new_AGE == 3 ~ 4,
+                             new_AGE %in% c(4,5,6,7) ~ new_AGE)) %>%
+  group_by(gear, year, region_name) %>%
+  mutate(count = n()) %>%
+  ungroup() %>%
+  group_by(gear, year, new_AGE, region_name) %>%
+  mutate(age_count = n()) %>%
+  ungroup() %>%
+  mutate(age_prop = age_count/count) %>%
+  dplyr::select(year, gear, region_name, new_AGE, count, age_count, age_prop) %>%
+  arrange(gear, region_name, new_AGE, year) %>%
+  mutate(Population = case_when(region_name == "Yukon Carmacks" ~ "Carmacks",
+                                region_name == "Yukon Lower Canadian" ~ "Lower Mainstem",
+                                region_name == "Yukon mainstem" ~ "Middle Mainstem",
+                                region_name == "Yukon Pelly" ~ "Pelly",
+                                region_name == "Yukon Stewart" ~ "Stewart",
+                                region_name == "Yukon upper" ~ "Upper Lakes and Mainstem",
+                                region_name == "Yukon White-Donjek" ~ "White-Donjek",
+                                region_name == "Yukon Teslin" ~ "Teslin")) %>%
+  rename(Fish.Age = new_AGE) %>%
+  as.data.frame()
+
+data$Fish.Age <- as.factor(data$Fish.Age)
+
+jtc2 <- jtc %>%
+  dplyr::select(year, age_4, age_5, age_6, age_7) %>%
+  gather(age, age_prop, age_4:age_7) %>%
+  mutate(Population = "Aggregate") %>%
+  mutate(Fish.Age = case_when(age == "age_4" ~ "4",
+                              age == "age_5" ~ "5",
+                              age == "age_6" ~ "6",
+                              age == "age_7" ~ "7")) %>%
+  dplyr::select(year, Population, Fish.Age, age_prop) %>%
+  as.data.frame()
+
+data2 <- full_join(data, jtc2) %>% arrange(year) %>% as.data.frame()
+
+data2$Population <- factor(data2$Population, levels = c("Lower Mainstem","White-Donjek","Stewart","Pelly",
+                                                        "Middle Mainstem","Carmacks","Upper Lakes and Mainstem","Teslin","Aggregate"))
+
+g <- ggplot(data2, aes(x=year, y=age_prop, fill=Fish.Age)) +
+  geom_bar(stat= "identity", position = "fill") +
+  scale_x_continuous(limits = c(1985,2018), breaks = seq(1985,2020,5)) +
+  scale_fill_viridis(option = "viridis", discrete = TRUE) +
+  xlab("Year") +
+  ylab("Proportion") +
+  facet_wrap(~Population) +
+  labs(fill="Age class")+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle=45, hjust = 1, vjust=1, size=6),
+        strip.text = element_text(size=6),
+        axis.title = element_text(size=9),
+        axis.text = element_text(size=6),
+        legend.key.size = unit(10, "pt"),
+        legend.background = element_blank(),
+        legend.text = element_text(size = 7),
+        legend.title = element_text(size = 9),
+        panel.grid.minor = element_blank())
+
+
+jpeg("04_figures/figures/figures11.jpeg", width = 6, height = 5, units = "in", res = 200)
 print(g)
 dev.off()
