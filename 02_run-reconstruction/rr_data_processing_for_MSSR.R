@@ -21,7 +21,7 @@ rr_modAll$sd <- rr_modAll[,8] # approximate SD of border passage
 
 xx <- merge(rr_modAll,stockIds,by="stock")
 
-RR_output <- arrange(xx,id_SRA,year)
+RR_output <- arrange(xx,id_MSSR,year)
 
 agg_data <- subset(agg_data, year>1984 & year <2020)
 
