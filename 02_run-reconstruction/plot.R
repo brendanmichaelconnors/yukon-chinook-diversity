@@ -1,7 +1,8 @@
+#-----------------------------------------------------------------------------#
 # plot.R
+#
 # Plots for Yukon River Chinook run reconstruction
-# Steven Rossi (spr1@sfu.ca), Beau Doherty, Sean Cox
-# June 3, 2019
+#-----------------------------------------------------------------------------#
 
 plotAll <- function( rpt, folder="." )
 {
@@ -116,9 +117,9 @@ plotFitI <- function( rpt, folder="." )
   } # next g
 }
 
-plotFitIMulti <- function( rptFiles=c("./rr_outputs/rpt.base.Rdata",
-                                      "./rr_outputs/rpt.oneCor.Rdata",
-                                      "./rr_outputs/rpt.fullCor.Rdata") )
+plotFitMulti <- function( rptFiles=c("./rr_outputs/rpt.base.Rdata",
+                                         "./rr_outputs/rpt.oneCor.Rdata",
+                                         "./rr_outputs/rpt.fullCor.Rdata") )
 {
   load(rptFiles[1])
   cols <- c("blue","red","green")
@@ -132,8 +133,8 @@ plotFitIMulti <- function( rptFiles=c("./rr_outputs/rpt.base.Rdata",
   z <- 0
   for( g in 1:rpt$nG )
   {
-    jpeg( file=paste("./figures/indexFitsg",g,".jpeg",sep=""),
-         height=hei[g], width=wid[g],
+    jpeg( file=paste("./rr_outputs/indexFitsg",g,".jpeg",sep=""),
+          height=hei[g], width=wid[g],
          units="in",res=400,bg = "transparent" )
     par( mfrow=dims[[g]], mar=c(2,2,1,1), oma=c(2,3,0,0) )
     for( t in 1:rpt$nT )
@@ -182,8 +183,8 @@ plotFitIMulti <- function( rptFiles=c("./rr_outputs/rpt.base.Rdata",
 
 plotTotalRunSize <- function( rpt, folder="." )
 {
-  pdf( file=paste(folder,"/totalRunSize.pdf",sep=""), height=5, width=7 )
-
+  jpeg("./rr_outputs/figureS2.jpeg", width = 7, height = 5, units = "in", res = 600)
+  
   par( mar=c(3,5,1,1) )
 
   #t <- !is.na(rpt$I_t)
@@ -383,10 +384,9 @@ plotRunSize <- function( rpt, folder="." )
 
 }
 
-plotRunSizeMulti <- function( rptFiles=c("mod1/rpt.Rdata",
-                                         "mod2/rpt.Rdata",
-                                         "mod3/rpt.Rdata")
-                            )
+plotRunSizeMulti <- function( rptFiles=c("./rr_outputs/rpt.base.Rdata",
+                                         "./rr_outputs/rpt.oneCor.Rdata",
+                                         "./rr_outputs/rpt.fullCor.Rdata") )
 {
   stks <- c("L.Mstem","W.Donjek","Pelly","Stewart","Carmacks","Teslin","M.Mstem","U.Mstem")
   cols <- brewer.pal(3,"Set1")[c(1,3,2)]
@@ -416,7 +416,7 @@ plotRunSizeMulti <- function( rptFiles=c("mod1/rpt.Rdata",
 
   jtr <- c(-0.2,0,0.2)
 
-  pdf( file="runSizeMult.pdf", height=8, width=7 )
+  jpeg("./rr_outputs/figureS6.jpeg", width = 7, height = 8, units = "in", res = 600)
   par( mfrow=c(8,1), mar=c(0,2,0,1), oma=c(2,3,2,2) )
 
   for( s in 1:rpt$nS )
@@ -826,7 +826,7 @@ plotStatsMu <- function()
 
 plotDevSD <- function()
 {
-  controlTable  <- .readParFile( "./02_run-reconstruction/estControlFile.base.txt" )
+  controlTable  <- .readParFile( "./estControlFile.base.txt" )
   ctrl <- .createList( controlTable )
   stocks <- ctrl$stks
   cols <- brewer.pal(3,"Set1")
@@ -843,7 +843,7 @@ plotDevSD <- function()
     upp_is[i, ] <- sdrpt$uCI
   }
   x <- 1:8
-  jpeg("./figures/arrivalTimingSD.jpeg", height=4, width=6, units="in",res=400,bg = "transparent")
+  jpeg("./rr_outputs/FigureS7.jpeg", height=4, width=6, units="in",res=400,bg = "transparent")
   par( mar=c(5,6,1,1) )
   plot( x=c(0,9), y=c(min(low_is)*0.95,max(upp_is)*1.05), xaxs="i",
         type="n", yaxs="i", axes=FALSE,
