@@ -493,6 +493,8 @@ a <- ggplot(logresid_perc_scale, aes(x=BroodYear, y = med , color=population), s
 
 resids <- logresid_perc[,c(1,2,7)]
 cor_resids <- spread(resids, population, med)[,-1]
+corr_matrix <- cor(cor_resids[,c(6,7,1,3,4,5,8,2)])
+avg_pairwise_corr <- mean(corr_matrix[row(corr_matrix)!=col(corr_matrix)])
 
 b <- ggcorrplot(cor(cor_resids[,c(6,7,1,3,4,5,8,2)]), type = "upper",
                 outline.col = "white",
