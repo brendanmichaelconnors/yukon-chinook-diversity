@@ -1,31 +1,8 @@
 The code and data in this folder of the repository are for fitting a state-space run-reconstruction (RR) model to daily estimates of total border passage and population composition to estimate annual population-specific border passage and spawner abundance.
 
-Run the code in `fit_RR_models.R` to fit the three alternative configurations of the RR model, and generate outputs including a number of plots.
+Source the code in `fit_RR_models.R` to fit the three alternative configurations of the RR model, and generate outputs including a number of plots.
 
-Most of the RR code was origionaly developed by Landmark Fisheries Research under contractto ESSA Technologies Ltd. As such the following disclainer applies:
+Most of the RR code in this reporsitory was origionaly developed by Landmark Fisheries Research under contractto ESSA Technologies Ltd. As such the following disclainer applies:
 
-#-----------------------------------------------------------------------------#
-# Copyright 2019 by Landmark Fisheries Research, Ltd.                         #
-#                                                                             #
-# This software is provided to Essa Technologies in the hope that it will be  #
-# useful, but WITHOUT ANY WARRANTY; without even the implied warranty of      #
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.                        #
-#                                                                             #
-# ALL INTELLECTUAL PROPERTY REMAINS WITH LANDMARK FISHERIES RESEARCH, LTD.    #
-# THIS SOFTWARE MAY NOT BE REDISTRIBUTED, SUBLICENCED, COPIED, OR SHARED      #
-# OUTSIDE OF ESSA TECHNOLOGIES WITHOUT THE EXPRESS WRITTEN CONSENT OF         #
-# LANDMARK FISHERIES RESEARCH, LTD.                                           #
-#                                                                             #
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" #
-# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE   #
-# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE  #
-# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE    #
-# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR         #
-# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF        #
-# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS    #
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN     #
-# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)     #
-# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE  #
-# POSSIBILITY OF SUCH DAMAGE.                                                 #
-#-----------------------------------------------------------------------------#
+> Copyright 2019 by Landmark Fisheries Research, Ltd. This software is provided to Essa Technologies in the hope that it will be   useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. ALL INTELLECTUAL PROPERTY REMAINS WITH LANDMARK FISHERIES RESEARCH, LTD. THIS SOFTWARE MAY NOT BE REDISTRIBUTED, SUBLICENCED, COPIED, OR SHARED OUTSIDE OF ESSA TECHNOLOGIES WITHOUT THE EXPRESS WRITTEN CONSENT OF LANDMARK FISHERIES RESEARCH, LTD. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
 
