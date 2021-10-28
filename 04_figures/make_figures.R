@@ -494,7 +494,6 @@ a <- ggplot(logresid_perc_scale, aes(x=BroodYear, y = med , color=population), s
 resids <- logresid_perc[,c(1,2,7)]
 cor_resids <- spread(resids, population, med)[,-1]
 corr_matrix <- cor(cor_resids[,c(6,7,1,3,4,5,8,2)])
-avg_pairwise_corr <- mean(corr_matrix[row(corr_matrix)!=col(corr_matrix)])
 
 b <- ggcorrplot(cor(cor_resids[,c(6,7,1,3,4,5,8,2)]), type = "upper",
                 outline.col = "white",
@@ -571,24 +570,6 @@ weights <- ensemble%>%
   group_by(population)%>%
   summarize(sum_size = sum(med))%>%
   mutate(weights = sum_size / sum(sum_size))
-
-
-var_damp <- matrix(NA,1000,1)
-for(i in 1:1000){
-  sub_samp <- CVs.df[sample(1:1000,1),]
-  weight_mean_CV <- sum(sub_samp[1:8]*weights$weights)
-  var_damp[i,1] <- as.numeric(weight_mean_CV/sub_samp[9])
-}
-
-quantile(as.vector(var_damp), probs=c(0.025,0.5,0.975))
-
-#var_damp_unweight <- matrix(NA,1000,1) 
-#for(i in 1:1000){
-#  sub_samp <- CVs.df[sample(1:1000,1),]
-#  var_damp_unweight[i,1] <- as.numeric((sum(sub_samp[1:8])/8)/sub_samp[9])
-#}
-
-#quantile(as.vector(var_damp_unweight), probs=c(0.025,0.5,0.975))
 
 ensemble$population <-lapply(ensemble$population, as.character)
 run_size_Carmacks <- rbind(ensemble[ensemble$population == "Upper Lakes and Mainstem",],
@@ -859,3 +840,34 @@ g <- ggplot(data2, aes(x=year, y=age_prop, fill=Fish.Age)) +
 jpeg("04_figures/figures/figures11.jpeg", width = 6, height = 5, units = "in", res = 200)
 print(g)
 dev.off()
+
+# summary stats for main text ----
+
+# border passage
+ensemble %>%
+  group_by(pops_f) %>%
+  summarize(mean_passage = mean(med))
+
+# spawner-recruitment parameters
+alpha_beta_per 
+
+# correlation in recruitment resids
+mean(corr_matrix[row(corr_matrix)!=col(corr_matrix)])
+
+# run-size variance dampening
+var_damp <- matrix(NA,1000,1)
+for(i in 1:1000){
+  sub_samp <- CVs.df[sample(1:1000,1),]
+  weight_mean_CV <- sum(sub_samp[1:8]*weights$weights)
+  var_damp[i,1] <- as.numeric(weight_mean_CV/sub_samp[9])
+}
+
+quantile(as.vector(var_damp), probs=c(0.025,0.5,0.975))
+
+#var_damp_unweight <- matrix(NA,1000,1) 
+#for(i in 1:1000){
+#  sub_samp <- CVs.df[sample(1:1000,1),]
+#  var_damp_unweight[i,1] <- as.numeric((sum(sub_samp[1:8])/8)/sub_samp[9])
+#}
+
+#quantile(as.vector(var_damp_unweight), probs=c(0.025,0.5,0.975))
