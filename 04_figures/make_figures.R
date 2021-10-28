@@ -854,6 +854,25 @@ alpha_beta_per
 # correlation in recruitment resids
 mean(corr_matrix[row(corr_matrix)!=col(corr_matrix)])
 
+# harvest-risk tradeoffs
+
+t3.3$med_V2[which(t3.3$med_V2==max(t3.3$med_V2))] # median max-mixed stock harvest
+t3.3$low_V2[which(t3.3$low_V2==max(t3.3$low_V2))] # lower CI max-mixed stock harvest
+t3.3$upp_V2[which(t3.3$upp_V2==max(t3.3$upp_V2))] # upper CI max-mixed stock harvest
+
+t3.3$U[which(t3.3$med_V2==max(t3.3$med_V2))] # median max-mixed stock harvest rate
+t3.3$U[which(t3.3$low_V2==max(t3.3$low_V2))] # lower CI max-mixed stock harvest rate
+t3.3$U[which(t3.3$upp_V2==max(t3.3$upp_V2))] # upper CI max-mixed stock harvest rate
+
+t3.3$over.med[which(t3.3$med_V2==max(t3.3$med_V2))] # median overfished at max-mixed stock harvest 
+t3.3$over.low[which(t3.3$low_V2==max(t3.3$low_V2))] # lower CI overfished at max-mixed stock harvest
+t3.3$over.up[which(t3.3$upp_V2==max(t3.3$upp_V2))] # upper CI overfished at max-mixed stock harvest
+
+t3.3$ext.med[which(t3.3$med_V2==max(t3.3$med_V2))] # median overfished at max-mixed stock harvest 
+t3.3$ext.low[which(t3.3$low_V2==max(t3.3$low_V2))] # lower CI overfished at max-mixed stock harvest
+t3.3$ext[which(t3.3$upp_V2==max(t3.3$upp_V2))] # upper CI overfished at max-mixed stock harvest
+
+
 # run-size variance dampening
 var_damp <- matrix(NA,1000,1)
 for(i in 1:1000){
