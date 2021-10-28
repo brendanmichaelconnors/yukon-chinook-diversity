@@ -547,7 +547,7 @@ indCVs <- matrix(NA,1000,8); colnames(indCVs)<-unique(spawn_df$population)
 for (i in unique(spawn_df$population)){
   for(j in 1:1000){
     pop <- subset(spawn_df, population == i)[sample(1:1000,1),]
-    indCVs[j,i] <-sd(as.numeric(pop))/mean(as.numeric(pop))
+    indCVs[j,i] <-sd(as.numeric(pop[-1]))/mean(as.numeric(pop[-1]))
   }
 }
 
@@ -851,9 +851,26 @@ ensemble %>%
 # spawner-recruitment parameters
 alpha_beta_per 
 
+# median lag-1 autocorrelation in rec resids
+median(alpha_beta_per$phi_med)
+
 # correlation in recruitment resids
 mean(corr_matrix[row(corr_matrix)!=col(corr_matrix)])
 
+# median % change in productivity between periods
+early_resids <- logresid_perc_scale %>%
+                  group_by(population) %>%
+                  filter(BroodYear %in% (1990:1995)) %>%
+                  summarise(mean(med))
+
+late_resids <- logresid_perc_scale %>%
+  group_by(population) %>%
+  filter(BroodYear %in% (2005:2010)) %>%
+  summarise(mean(med))
+
+median(-1-(late_resids$`mean(med)`/early_resids$`mean(med)`))
+
+  
 # harvest-risk tradeoffs
 
 t3.3$med_V2[which(t3.3$med_V2==max(t3.3$med_V2))] # median max-mixed stock harvest
@@ -872,6 +889,9 @@ t3.3$ext.med[which(t3.3$med_V2==max(t3.3$med_V2))] # median overfished at max-mi
 t3.3$ext.low[which(t3.3$low_V2==max(t3.3$low_V2))] # lower CI overfished at max-mixed stock harvest
 t3.3$ext[which(t3.3$upp_V2==max(t3.3$upp_V2))] # upper CI overfished at max-mixed stock harvest
 
+# run-size CVs
+colMeans(indCVs)
+colMeans(aggCV)
 
 # run-size variance dampening
 var_damp <- matrix(NA,1000,1)
@@ -890,3 +910,8 @@ quantile(as.vector(var_damp), probs=c(0.025,0.5,0.975))
 #}
 
 #quantile(as.vector(var_damp_unweight), probs=c(0.025,0.5,0.975))
+
+# difference in CVs between sections of river
+rt_cvs %>%
+  group_by(Location) %>%
+  summarise(mean(CV))
