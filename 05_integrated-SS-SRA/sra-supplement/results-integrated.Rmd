@@ -395,7 +395,7 @@ Black points in all plots represent the observed value.
 
 ##### Escapement
 
-*Both methods returned similar escapement time series. Only in very rare occasions did the estimated values differ substantially (e.g., early 1990s for the Carmacks population).*
+*Both methods returned similar escapement time series. Only in very rare occasions did the estimated values differ substantially (e.g., early 1990s for the Carmacks and Pelly populations).*
 
 ```{r esc-fig, fig.width = 5, fig.height = 7}
 jrep = function(x, j) {
@@ -736,7 +736,7 @@ alpha_seq_out = lapply(post_list, function(post) {
 })
 
 my_par()
-plot(alpha_seq_out[[1]]$alpha["50%",] ~ alpha_seq_out[[1]]$Seq["50%",], xlim = c(0,30), ylim = c(2, 8),
+plot(alpha_seq_out[[1]]$alpha["50%",] ~ alpha_seq_out[[1]]$Seq["50%",], xlim = c(0,30), ylim = c(1, 10),
      pch = 21, col = cols$solid[1], bg = cols$transparent[1], cex = 1.5, las = 1,
      xlab = "Equilibrium Population Size (000s)", ylab = "Intrinsic Productivity (Max R/S)")
 segments(alpha_seq_out[[1]]$Seq["50%",], alpha_seq_out[[1]]$alpha["50%",],
