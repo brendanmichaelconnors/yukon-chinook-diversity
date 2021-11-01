@@ -1,5 +1,5 @@
 ---
-title: "Population diversity in Canadian-origin Chinook salmon: portfolio quantification and implications for conservation, harvest, equity, and resilience"
+title: "Chinook salmon population diversity contributes to fishery stability and trade-offs with mixed-stock harvest in the Yukon River"
 subtitle: "SUPPLEMENT B"
 author: "B.M. Connors, M. R. Siegle, J. Harding, S. Rossi, B.A. Staton, M. Jones, M. Bradford, R. Browne, B. Bechtol, B. Doherty, S. Cox"
 output: 
