@@ -1,7 +1,7 @@
 ---
-title: "Chinook salmon population diversity contributes to fishery stability and trade-offs with mixed-stock harvest in the Yukon River"
-subtitle: "SUPPLEMENT B"
-author: "B.M. Connors, M. R. Siegle, J. Harding, S. Rossi, B.A. Staton, M. Jones, M. Bradford, R. Browne, B. Bechtol, B. Doherty, S. Cox"
+title: "Chinook population diversity contributes to fishery stability and trade-offs with mixed-stock harvest in the Yukon River"
+subtitle: "Appendix S2"
+author: "B.M. Connors, M. R. Siegle, J. Harding, S. Rossi, B.A. Staton, M.L. Jones, M. Bradford, R. Browne, B. Bechtol, B. Doherty, S. Cox"
 output: 
   bookdown::html_document2:
   # bookdown::word_document2:
