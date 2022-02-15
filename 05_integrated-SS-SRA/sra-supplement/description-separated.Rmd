@@ -7,7 +7,7 @@ editor_options:
 ## Model Structure
 
 To characterize Chinook salmon population diversity we fit individual age-structured state-space spawner-recruitment models [@fleischman-etal-2013] to all available data for each population (i.e., time series of estimated catch, spawner abundance and age composition).
-These sources of information, along with measures of observation variance, were externally derived from the multi-population run-reconstructions described in Supplement A for spawner abundance and published estimates for catch and age composition.
+These sources of information, along with measures of observation variance, were externally derived from the multi-population run-reconstructions described in Appendix S1 for spawner abundance and published estimates for catch and age composition.
 An alternative approach would have been to integrate the run-reconstructions and spawner-recruitment analyses into a single model.
 However, we note that previous research found that as long as the spawner-recruitment model carries forward uncertainty in input estimates from the run-reconstruction models, sequential analyses like those that we conducted produce very similar estimates of abundance, population dynamics parameters, and management reference points, both in terms of point estimates and uncertainty [@staton-etal-2017].
 Because the same model was fitted to each population, all symbols in the presentation of the state-space model actually have a $j$ subscript appended to them to represent individual populations.
@@ -17,7 +17,7 @@ We omit this for the presentation here, both to simplify it and to emphasize tha
 
 The process model is intended to represent the true population dynamics (i.e.,free of measurement error).
 This component of our state-space spawner-recruitment model specifies productivity, density-dependence, and age-at-maturity by cohort (i.e. brood year, $y$).
-Recruitment abundances of adult Chinook ($R$) from 1985 to 2019 were treated as unobserved states and modeled as a function of spawner abundance ($S$) assuming a @ricker-1954 spawner-recruitment relationship with serially auto-correlated log-normal process variation:
+Recruitment abundances of adult Chinook ($R$) from 1985 to 2019 were treated as unobserved states and modeled as a function of spawner abundance ($S$), in brood year $y$, assuming a @ricker-1954 spawner-recruitment relationship with serially auto-correlated log-normal process variation:
 
 \begin{equation}
 \ln(R_y) = \ln(S_y) + \ln(\alpha) - \beta S_y + v_y
