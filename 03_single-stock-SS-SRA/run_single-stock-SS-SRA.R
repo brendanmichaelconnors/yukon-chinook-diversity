@@ -7,13 +7,13 @@ input_data <- readRDS("./02_run-reconstruction/rr_outputs/Yukon_data_for_SS_SRA.
 age_and_harvest <- read.csv("./01_inputs/data/jtc_age_and_harvest_data.csv")
 
 stock <- c("LowerMainstem",
-           "Stewart",
-           "Pelly",
            "WhiteDonjek",
-           "MiddleMainstem",
+           "Pelly",
+           "Stewart",
            "Carmacks",
-           "UpperLakesAndMainstem",
-           "Teslin")
+           "Teslin",
+           "MiddleMainstem",
+           "UpperLakesAndMainstem") 
            
 
 # prepare age data (age)
@@ -68,7 +68,7 @@ posteriors <- array(NA,
                     dim = c(10000, 562, 8),
                     dimnames = list(NULL,NULL,populations))
 
-# loop through populaitons and fit SS-SRA to each
+# loop through populations and fit SS-SRA to each
 for(i in populations){
   out <- jags_fit(i, 
                   age = age, 
