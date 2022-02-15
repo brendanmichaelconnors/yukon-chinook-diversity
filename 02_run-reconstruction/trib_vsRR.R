@@ -100,7 +100,8 @@ ggplot(scaled_data, aes(x = scaled_esc, y = scaled_index)) +
   	hjust = -0.4,
   	vjust = -7,
   	size = 3) +
-  	geom_point(aes(x = scaled_esc, y = scaled_index, color = Year), size=1) 
+  	geom_point(aes(x = scaled_esc, y = scaled_index, color = Year), size=1) +
+  theme(strip.background = element_blank())
 
   
 ggsave("./04_figures/figures/figureS10.jpeg", height = 5, width = 5.5)
