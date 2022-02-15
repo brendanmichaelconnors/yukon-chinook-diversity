@@ -6,7 +6,7 @@
 #------------------------------------------------------------------------------#
 
 rr_modAll <- read.csv("./02_run-reconstruction/rr_outputs/ensemble.csv") # ensemble run-reconstruction output
-pop_age_comp <- readRDS("./01_inputs/data/pop_age_comp_2008_2019.rds") # age composition by population form merging GSI and ASL data
+pop_age_comp <- readRDS("./01_inputs/data/pop_age_comp_2008_2019.rds") # age composition by population from merging GSI and ASL data
 agg_data <- read.csv("./01_inputs/data/jtc_age_and_harvest_data.csv") # aggregate JTC age comp data and CDN harvest rate
 
 stockIds <- read.csv("02_run-reconstruction/data/stockIDs.csv")
