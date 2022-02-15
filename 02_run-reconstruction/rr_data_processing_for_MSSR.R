@@ -95,13 +95,13 @@ esc_data <- matrix(NA,280,8)
 esc_data <- as.data.frame(esc_data)
 colnames(esc_data) <- c("stock","year","mean","sd","lwr95CI","upr95CI","cv","obs")
 esc_data[,1] <- c(rep("LwrMain",35),
-                  rep("Stewart",35),
-                  rep("Pelly",35),
                   rep("White-Donjek",35),
-                  rep("MidMain",35),
+                  rep("Pelly",35),
+                  rep("Stewart",35),
                   rep("Carmacks",35),
-                  rep("UprLksMain",35),
-                  rep("Teslin",35))
+                  rep("Teslin",35),
+                  rep("MidMain",35),
+                  rep("UprLksMain",35))
 
 esc_data[,2] <- rep(1985:2019,times=8)
 esc_data[,3] <- S_obs
@@ -120,13 +120,13 @@ colnames(age_data) <- c("stock","year","a4","a5","a6","a7","n")
 
 age_data[,1] <- c(rep("aggregate",35),
                   rep("LwrMain",35),
-                  rep("Stewart",35),
-                  rep("Pelly",35),
                   rep("White-Donjek",35),
-                  rep("MidMain",35),
+                  rep("Pelly",35),
+                  rep("Stewart",35),
                   rep("Carmacks",35),
-                  rep("UprLksMain",35),
-                  rep("Teslin",35))
+                  rep("Teslin",35),
+                  rep("MidMain",35),
+                  rep("UprLksMain",35))
 
 age_data[,3:6] <- rbind(x_tas_obs_agg,
                               x_tas_obs[,,1],
