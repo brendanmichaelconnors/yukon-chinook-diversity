@@ -86,20 +86,20 @@ post = post_remove(post, "lnalpha", F)
 
 # re-order populations for consistency with main-text figures
 # White-Donjek needs to come right after LwrMain and before Stewart and Pelly
-old = get_params(post, type = "base_index")
-new = old
+#old = get_params(post, type = "base_index")
+#new = old
 
-new[str_detect(old, "\\[2\\]")] = str_replace(old[str_detect(old, "\\[2\\]")], "\\[2\\]", "[3]")
-new[str_detect(old, "\\[3\\]")] = str_replace(old[str_detect(old, "\\[3\\]")], "\\[3\\]", "[4]")
-new[str_detect(old, "\\[4\\]")] = str_replace(old[str_detect(old, "\\[4\\]")], "\\[4\\]", "[2]")
-new[str_detect(old, ",2\\]$")] = str_replace(old[str_detect(old, ",2\\]$")], ",2\\]$", ",3]")
-new[str_detect(old, ",3\\]$")] = str_replace(old[str_detect(old, ",3\\]$")], ",3\\]$", ",4]")
-new[str_detect(old, ",4\\]$")] = str_replace(old[str_detect(old, ",4\\]$")], ",4\\]$", ",2]")
+#new[str_detect(old, "\\[2\\]")] = str_replace(old[str_detect(old, "\\[2\\]")], "\\[2\\]", "[3]")
+#new[str_detect(old, "\\[3\\]")] = str_replace(old[str_detect(old, "\\[3\\]")], "\\[3\\]", "[4]")
+#new[str_detect(old, "\\[4\\]")] = str_replace(old[str_detect(old, "\\[4\\]")], "\\[4\\]", "[2]")
+#new[str_detect(old, ",2\\]$")] = str_replace(old[str_detect(old, ",2\\]$")], ",2\\]$", ",3]")
+#new[str_detect(old, ",3\\]$")] = str_replace(old[str_detect(old, ",3\\]$")], ",3\\]$", ",4]")
+#new[str_detect(old, ",4\\]$")] = str_replace(old[str_detect(old, ",4\\]$")], ",4\\]$", ",2]")
 
-x = as.matrix(post)
-colnames(x) = new
-x = x[,sort(colnames(x))]
-post = post_convert(cbind(postpack:::id_mat(post), x))
+#x = as.matrix(post)
+#colnames(x) = new
+#x = x[,sort(colnames(x))]
+#post = post_convert(cbind(postpack:::id_mat(post), x))
 ```
 
 ```{r load data}
@@ -115,15 +115,15 @@ H_dat = read.csv(file.path(in_dir, C_file), stringsAsFactors = F)
 
 # re-order populations for consistency with main-text figures
 # White-Donjek needs to come right after LwrMain and before Stewart and Pelly
-top = S_dat[S_dat$stock %in% "LwrMain",]
-shift = S_dat[S_dat$stock %in% "White-Donjek",]
-bottom = S_dat[!(S_dat$stock %in% c("LwrMain", "White-Donjek")),]
-S_dat = rbind(top, shift, bottom)
+#top = S_dat[S_dat$stock %in% "LwrMain",]
+#shift = S_dat[S_dat$stock %in% "White-Donjek",]
+#bottom = S_dat[!(S_dat$stock %in% c("LwrMain", "White-Donjek")),]
+#S_dat = rbind(top, shift, bottom)
 
-top = age_dat[age_dat$stock %in% c("aggregate", "LwrMain"),]
-shift = age_dat[age_dat$stock %in% "White-Donjek",]
-bottom = age_dat[!(age_dat$stock %in% c("aggregate", "LwrMain", "White-Donjek")),]
-age_dat = rbind(top, shift, bottom)
+#top = age_dat[age_dat$stock %in% c("aggregate", "LwrMain"),]
+#shift = age_dat[age_dat$stock %in% "White-Donjek",]
+#bottom = age_dat[!(age_dat$stock %in% c("aggregate", "LwrMain", "White-Donjek")),]
+#age_dat = rbind(top, shift, bottom)
 
 # prepare the data files
 inputs = raw_data_prep(

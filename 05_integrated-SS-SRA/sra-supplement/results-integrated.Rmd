@@ -229,22 +229,22 @@ post_sep = post_rename(post_sep, "^log.resid[", "log_resid")
 # drop out lnalpha
 post_sep = post_remove(post_sep, "lnalpha", ask = F)
 
-# re-order populations for consistency with main-text figures
-# White-Donjek needs to come right after LwrMain and before Stewart and Pelly
-old = get_params(post_sep, type = "base_index")
-new = old
-
-new[str_detect(old, "\\[2\\]")] = str_replace(old[str_detect(old, "\\[2\\]")], "\\[2\\]", "[3]")
-new[str_detect(old, "\\[3\\]")] = str_replace(old[str_detect(old, "\\[3\\]")], "\\[3\\]", "[4]")
-new[str_detect(old, "\\[4\\]")] = str_replace(old[str_detect(old, "\\[4\\]")], "\\[4\\]", "[2]")
-new[str_detect(old, ",2\\]$")] = str_replace(old[str_detect(old, ",2\\]$")], ",2\\]$", ",3]")
-new[str_detect(old, ",3\\]$")] = str_replace(old[str_detect(old, ",3\\]$")], ",3\\]$", ",4]")
-new[str_detect(old, ",4\\]$")] = str_replace(old[str_detect(old, ",4\\]$")], ",4\\]$", ",2]")
-
-x = as.matrix(post_sep)
-colnames(x) = new
-x = x[,sort(colnames(x))]
-post_sep = post_convert(cbind(postpack:::id_mat(post_sep), x))
+# # re-order populations for consistency with main-text figures
+# # White-Donjek needs to come right after LwrMain and before Stewart and Pelly
+# old = get_params(post_sep, type = "base_index")
+# new = old
+# 
+# new[str_detect(old, "\\[2\\]")] = str_replace(old[str_detect(old, "\\[2\\]")], "\\[2\\]", "[3]")
+# new[str_detect(old, "\\[3\\]")] = str_replace(old[str_detect(old, "\\[3\\]")], "\\[3\\]", "[4]")
+# new[str_detect(old, "\\[4\\]")] = str_replace(old[str_detect(old, "\\[4\\]")], "\\[4\\]", "[2]")
+# new[str_detect(old, ",2\\]$")] = str_replace(old[str_detect(old, ",2\\]$")], ",2\\]$", ",3]")
+# new[str_detect(old, ",3\\]$")] = str_replace(old[str_detect(old, ",3\\]$")], ",3\\]$", ",4]")
+# new[str_detect(old, ",4\\]$")] = str_replace(old[str_detect(old, ",4\\]$")], ",4\\]$", ",2]")
+# 
+# x = as.matrix(post_sep)
+# colnames(x) = new
+# x = x[,sort(colnames(x))]
+# post_sep = post_convert(cbind(postpack:::id_mat(post_sep), x))
 
 # get aggregate harvest
 C_stock = post_subset(post_sep, "^C", matrix = T)
@@ -276,22 +276,22 @@ post_int = readRDS(file.path(post_dir, int_post_file))
 # and we are calculating this using recruitment residuals anyways
 post_int = post_remove(post_int, "rho_mat", F)
 
-# re-order populations for consistency with main-text figures
-# White-Donjek needs to come right after LwrMain and before Stewart and Pelly
-old = get_params(post_int, type = "base_index")
-new = old
-
-new[str_detect(old, "\\[2\\]")] = str_replace(old[str_detect(old, "\\[2\\]")], "\\[2\\]", "[3]")
-new[str_detect(old, "\\[3\\]")] = str_replace(old[str_detect(old, "\\[3\\]")], "\\[3\\]", "[4]")
-new[str_detect(old, "\\[4\\]")] = str_replace(old[str_detect(old, "\\[4\\]")], "\\[4\\]", "[2]")
-new[str_detect(old, ",2\\]$")] = str_replace(old[str_detect(old, ",2\\]$")], ",2\\]$", ",3]")
-new[str_detect(old, ",3\\]$")] = str_replace(old[str_detect(old, ",3\\]$")], ",3\\]$", ",4]")
-new[str_detect(old, ",4\\]$")] = str_replace(old[str_detect(old, ",4\\]$")], ",4\\]$", ",2]")
-
-x = as.matrix(post_int)
-colnames(x) = new
-x = x[,sort(colnames(x))]
-post_int = post_convert(cbind(postpack:::id_mat(post_int), x))
+# # re-order populations for consistency with main-text figures
+# # White-Donjek needs to come right after LwrMain and before Stewart and Pelly
+# old = get_params(post_int, type = "base_index")
+# new = old
+# 
+# new[str_detect(old, "\\[2\\]")] = str_replace(old[str_detect(old, "\\[2\\]")], "\\[2\\]", "[3]")
+# new[str_detect(old, "\\[3\\]")] = str_replace(old[str_detect(old, "\\[3\\]")], "\\[3\\]", "[4]")
+# new[str_detect(old, "\\[4\\]")] = str_replace(old[str_detect(old, "\\[4\\]")], "\\[4\\]", "[2]")
+# new[str_detect(old, ",2\\]$")] = str_replace(old[str_detect(old, ",2\\]$")], ",2\\]$", ",3]")
+# new[str_detect(old, ",3\\]$")] = str_replace(old[str_detect(old, ",3\\]$")], ",3\\]$", ",4]")
+# new[str_detect(old, ",4\\]$")] = str_replace(old[str_detect(old, ",4\\]$")], ",4\\]$", ",2]")
+# 
+# x = as.matrix(post_int)
+# colnames(x) = new
+# x = x[,sort(colnames(x))]
+# post_int = post_convert(cbind(postpack:::id_mat(post_int), x))
 
 # get rho_mat2: for consistent comparisons with the separate model
 # the nodes called "rho_mat" are calculated from the covariances in Sigma_R nodes
@@ -339,15 +339,15 @@ H_dat = read.csv(file.path(in_dir, C_file), stringsAsFactors = F)
 
 # re-order populations for consistency with main-text figures
 # White-Donjek needs to come right after LwrMain and before Stewart and Pelly
-top = S_dat[S_dat$stock %in% "LwrMain",]
-shift = S_dat[S_dat$stock %in% "White-Donjek",]
-bottom = S_dat[!(S_dat$stock %in% c("LwrMain", "White-Donjek")),]
-S_dat = rbind(top, shift, bottom)
-
-top = age_dat[age_dat$stock %in% c("aggregate", "LwrMain"),]
-shift = age_dat[age_dat$stock %in% "White-Donjek",]
-bottom = age_dat[!(age_dat$stock %in% c("aggregate", "LwrMain", "White-Donjek")),]
-age_dat = rbind(top, shift, bottom)
+# top = S_dat[S_dat$stock %in% "LwrMain",]
+# shift = S_dat[S_dat$stock %in% "White-Donjek",]
+# bottom = S_dat[!(S_dat$stock %in% c("LwrMain", "White-Donjek")),]
+# S_dat = rbind(top, shift, bottom)
+# 
+# top = age_dat[age_dat$stock %in% c("aggregate", "LwrMain"),]
+# shift = age_dat[age_dat$stock %in% "White-Donjek",]
+# bottom = age_dat[!(age_dat$stock %in% c("aggregate", "LwrMain", "White-Donjek")),]
+# age_dat = rbind(top, shift, bottom)
 
 # prepare the data files
 inputs = raw_data_prep(
@@ -862,11 +862,11 @@ compare_sr_curve = function(stock, legend = T) {
     alpha * S * exp(-beta * S)
   }
   
-  #pred_R1 = t(sapply(1:n_saved[[1]], function(i) predict_R(pred_S, alpha_post[[1]][i,1], beta_post[[1]][i,1])))
-  #pred_R2 = t(sapply(1:n_saved[[2]], function(i) predict_R(pred_S, alpha_post[[2]][i,1], beta_post[[2]][i,1])))
+  pred_R1 = t(sapply(1:n_saved[[1]], function(i) predict_R(pred_S, alpha_post[[1]][i,1], beta_post[[1]][i,1])))
+  pred_R2 = t(sapply(1:n_saved[[2]], function(i) predict_R(pred_S, alpha_post[[2]][i,1], beta_post[[2]][i,1])))
   
-  pred_R1 = t(sapply(1:n_saved[[1]], function(i) predict_R(pred_S, alpha_post[i,1], beta_post[i,1])))
-  pred_R2 = t(sapply(1:n_saved[[2]], function(i) predict_R(pred_S, alpha_post[i,2], beta_post[i,2])))
+  #pred_R1 = t(sapply(1:n_saved[[1]], function(i) predict_R(pred_S, alpha_post[i,1], beta_post[i,1])))
+  #pred_R2 = t(sapply(1:n_saved[[2]], function(i) predict_R(pred_S, alpha_post[i,2], beta_post[i,2])))
   
   pred_R1 = apply(pred_R1, 2, function(x) c(mean = mean(x), sd = sd(x), quantile(x, c(0.5, 0.025, 0.975))))
   pred_R2 = apply(pred_R2, 2, function(x) c(mean = mean(x), sd = sd(x), quantile(x, c(0.5, 0.025, 0.975))))
@@ -932,11 +932,11 @@ compare_sr_points = function(stock, legend = T) {
     alpha * S * exp(-beta * S)
   }
   
-  #pred_R1 = t(sapply(1:n_saved[[1]], function(i) predict_R(pred_S, alpha_post[[1]][i,1], beta_post[[1]][i,1])))
-  #pred_R2 = t(sapply(1:n_saved[[2]], function(i) predict_R(pred_S, alpha_post[[2]][i,1], beta_post[[2]][i,1])))
+  pred_R1 = t(sapply(1:n_saved[[1]], function(i) predict_R(pred_S, alpha_post[[1]][i,1], beta_post[[1]][i,1])))
+  pred_R2 = t(sapply(1:n_saved[[2]], function(i) predict_R(pred_S, alpha_post[[2]][i,1], beta_post[[2]][i,1])))
 
-  pred_R1 = t(sapply(1:n_saved[[1]], function(i) predict_R(pred_S, alpha_post[i,1], beta_post[i,1])))
-  pred_R2 = t(sapply(1:n_saved[[2]], function(i) predict_R(pred_S, alpha_post[i,2], beta_post[i,2])))
+  #pred_R1 = t(sapply(1:n_saved[[1]], function(i) predict_R(pred_S, alpha_post[i,1], beta_post[i,1])))
+  #pred_R2 = t(sapply(1:n_saved[[2]], function(i) predict_R(pred_S, alpha_post[i,2], beta_post[i,2])))
   
   pred_R1 = apply(pred_R1, 2, function(x) c(mean = mean(x), sd = sd(x), quantile(x, c(0.5, 0.025, 0.975))))
   pred_R2 = apply(pred_R2, 2, function(x) c(mean = mean(x), sd = sd(x), quantile(x, c(0.5, 0.025, 0.975))))
