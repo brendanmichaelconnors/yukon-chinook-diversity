@@ -110,8 +110,8 @@ logresid_perc <- logresid_df %>%
   ungroup() %>%
   mutate(year2 = rep(c(1,10:19,2,20:31,3:9),times=8),
          Adjyear = year2 + 6,
-         BroodYear = year2 + 1981,
-         Year = 1982 + Adjyear) %>%
+         BroodYear = year2 + 1984,
+         Year = 1985 + Adjyear) %>%
   dplyr::select(1,6,7,8,9,3,4,5) %>%
   arrange(population,Adjyear) %>%
   as.data.frame()
@@ -128,8 +128,8 @@ logresid_perc_scale <- logresid_df %>%
   ungroup() %>%
   mutate(year2 = rep(c(1,10:19,2,20:31,3:9),times=8),
          Adjyear = year2 + 6,
-         BroodYear = year2 + 1981,
-         Year = 1982 + Adjyear) %>%
+         BroodYear = year2 + 1984,
+         Year = 1985 + Adjyear) %>%
   dplyr::select(1,6,7,8,9,3,4,5) %>%
   arrange(population,Adjyear) %>%
   as.data.frame()
@@ -244,7 +244,7 @@ RS_df <- rbind(recruit, spawn) %>%
   mutate(Adjyear = case_when(param == "R" ~ year-7,
                              param == "S" ~ year)) %>%
   filter(Adjyear >= 1) %>%
-  mutate(BroodYear = Adjyear + 1981) %>%
+  mutate(BroodYear = Adjyear + 1984) %>%
   dplyr::select(population, BroodYear, param, lwr, med, upr) %>%
   as.data.frame()
 
@@ -262,21 +262,10 @@ Spawn_df <- RS_df %>% filter(param == "S") %>%
 
 RS_df2 <- full_join(Rec_df, Spawn_df)
 
-alpha_beta_per$population <- factor(alpha_beta_per$population, levels = c("Lower Mainstem","Stewart","Pelly",
-                                                                          "White-Donjek","Middle Mainstem",
+alpha_beta_per$population <- factor(alpha_beta_per$population, levels = c("Lower Mainstem","White-Donjek","Stewart","Pelly",
+                                                                          "Middle Mainstem",
                                                                           "Carmacks","Upper Lakes and Mainstem","Teslin"))
 
-# create dummy data for figure 8 plotting
-dummy <- data.frame(population = c("Lower Mainstem","White-Donjek","Stewart","Pelly","Middle Mainstem","Carmacks","Upper Lakes and Mainstem","Teslin"), 
-                    BroodYear = 1981, 
-                    R_med = rep(5,8),
-                    R_lwr = rep(5,8),
-                    R_upr = c(20,18,15,10,15,14,9,15),
-                    S_lwr = rep(5,8),
-                    S_med = rep(5,8),
-                    S_upr = rep(5,8))
-
-RS_df2 <- full_join(RS_df2, dummy)
 
 alphabeta_df3_perc$population <- factor(alphabeta_df3_perc$population, levels = c("Lower Mainstem","White-Donjek","Stewart","Pelly",
                                                                                   "Middle Mainstem",
@@ -343,7 +332,7 @@ b <- ggcorrplot(run_corr_2, type = "upper",
 
 # border passage by population 
 c <- ggplot(ensemble, aes(x = as.factor(year), y = med, fill = pops_f)) + 
-          geom_bar(stat = "identity",colour = "black", width=1) +
+  geom_bar(stat = "identity", width=1) +
           scale_fill_manual(values = c("#440154FF", "#277F8EFF","#46337EFF", "#365C8DFF", "#1FA187FF", "#4AC16DFF","#9FDA3AFF", "#FDE725FF")) +
           geom_errorbar(data=ensemble, aes(x= as.factor(year), ymin= lwr_2.5, ymax=upr_97.5, width=.1)) +
           xlab("Year") +
@@ -358,7 +347,8 @@ c <- ggplot(ensemble, aes(x = as.factor(year), y = med, fill = pops_f)) +
                 axis.text = element_text(size=6),
                 axis.title = element_text(size=9),
                 legend.position = "none",
-                panel.grid.minor = element_blank())
+                panel.grid.minor = element_blank(),
+                strip.background = element_blank())
 
 # combine three plots
 g <- ggarrange(ggarrange(a,b,nrow =2, labels = c("a", "b")),c,
@@ -396,7 +386,8 @@ a <- ggplot() +
         legend.text = element_text(size = 4),
         legend.title = element_text(size = 5),
         panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank())
+        panel.grid.minor = element_blank(),
+        strip.background = element_blank())
 
 pop_colors <- viridis(8,alpha=0.5)[c(6,1,5,3,2,8,7,4)]
 pop_colors_text <- viridis(8)[c(6,1,5,3,2,8,7,4)]
@@ -489,7 +480,8 @@ a <- ggplot(logresid_perc_scale, aes(x=BroodYear, y = med , color=population), s
         axis.title = element_text(size=9),
         axis.text = element_text(size=6),
         panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank())
+        panel.grid.minor = element_blank(),
+        strip.background = element_blank())
 
 resids <- logresid_perc[,c(1,2,7)]
 cor_resids <- spread(resids, population, med)[,-1]
@@ -757,7 +749,8 @@ g <- ggplot() +
         panel.spacing.x=unit(0.1, "lines"),
         panel.spacing.y=unit(0.3, "lines"),
         panel.grid.minor = element_blank(),
-        panel.grid.major = element_blank())+
+        panel.grid.major = element_blank(),
+        strip.background = element_blank())+
   geom_text(data = a, 
             mapping = aes(x = 237, y = -0.5, label = year_count, hjust = 1, vjust = 2),
             size=3, color = "red")
@@ -834,10 +827,11 @@ g <- ggplot(data2, aes(x=year, y=age_prop, fill=Fish.Age)) +
         legend.background = element_blank(),
         legend.text = element_text(size = 7),
         legend.title = element_text(size = 9),
-        panel.grid.minor = element_blank())
+        panel.grid.minor = element_blank(),
+        strip.background = element_blank())
 
 
-jpeg("04_figures/figures/figures11.jpeg", width = 6, height = 5, units = "in", res = 200)
+jpeg("04_figures/figures/figureS11.jpeg", width = 6, height = 5, units = "in", res = 200)
 print(g)
 dev.off()
 
