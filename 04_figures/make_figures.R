@@ -275,7 +275,7 @@ RS_df2$population <- factor(RS_df2$population, levels = c("Lower Mainstem","Whit
                                                           "Middle Mainstem",
                                                           "Carmacks","Upper Lakes and Mainstem","Teslin"))
 
-
+write.csv(RS_df2,"01_inputs/posteriors/brood_table.csv" )
 
 # Figure 3: multi-panel daily border passage + corr run-timing + annual border passage ----
 
