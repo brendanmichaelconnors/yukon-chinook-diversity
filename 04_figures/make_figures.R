@@ -137,7 +137,7 @@ logresid_perc_scale <- logresid_df %>%
 # create spawner dataframe
 spawn_df <- Posteriors.df[,c(1,492:526)] %>%
   group_by(population) %>%
-  sample_n(1000,replace=TRUE) %>%
+  sample_n(10000,replace=TRUE) %>%
   as.data.frame()
 
 spawn_df2 <- spawn_df[,c(1,2,13,24,31:36,3:12,14:23,25:30)]

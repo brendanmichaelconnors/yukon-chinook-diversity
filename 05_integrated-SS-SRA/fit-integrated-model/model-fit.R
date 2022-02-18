@@ -8,8 +8,8 @@ rm(list = ls(all = T))
 
 # MCMC settings
 short_run = F  # ~1.5 minutes -- for testing out this code. Totally inadequate for inference
-med_run = T    # ~1.0 hours -- for testing plotting code. Quasi-valid for inference
-long_run = F   # ~1.5 days -- used in manuscript analysis. Passes all diagnostic checks
+med_run = F    # ~1.0 hours -- for testing plotting code. Quasi-valid for inference
+long_run = T   # ~1.5 days -- used in manuscript analysis. Passes all diagnostic checks
 
 # read in other misc functions for this analysis
 source("functions.R")
@@ -92,3 +92,4 @@ unlink(jags_model_file)
 ##### SAVE THE OUTPUT #####
 saveRDS(post, file = file.path(out_dir, post_file))
 stop - start
+===
