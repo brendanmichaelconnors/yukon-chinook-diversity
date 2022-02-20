@@ -15,17 +15,17 @@ We omit this for the presentation here, both to simplify it and to emphasize tha
 
 ### Process model
 
-The process model is intended to represent the true population dynamics (i.e.,free of measurement error).
+The process model is intended to represent the true population dynamics (i.e., free of measurement error).
 This component of our state-space spawner-recruitment model specifies productivity, density-dependence, and age-at-maturity by cohort (i.e. brood year, $y$).
-Recruitment abundances of adult Chinook ($R$) from 1985 to 2019 were treated as unobserved states and modeled as a function of spawner abundance ($S$), in brood year $y$, assuming a @ricker-1954 spawner-recruitment relationship with serially auto-correlated log-normal process variation:
+Recruitment abundances of adult Chinook (i.e., the total number of adults from a given brood year that will ever return, $R_y$) were treated as unobserved states and modeled as a function of spawner abundance in year $y$ ($S_y$) assuming a @ricker-1954 spawner-recruitment relationship with serially auto-correlated log-normal process variation:
 
 \begin{equation}
 \ln(R_y) = \ln(S_y) + \ln(\alpha) - \beta S_y + v_y
 (\#eq:ricker)
 \end{equation}
 
-where $\alpha$ is productivity (intrinsic rate of growth), $\beta$ is the magnitude of within brood-year density-dependent effects and $v$ reflects inter-annual variation in survival from egg to adulthood.
-This variation was assumed to be correlated with lag-1 ($\phi$) over time:
+where $\alpha$ is productivity (intrinsic rate of growth), $\beta$ is the magnitude of within brood year density-dependent effects and $v_y$ reflects inter-annual variation in survival from egg to adulthood, which we term "recruitment anomalies".
+This variation was assumed to follow a lag-1 autoregressive process (correlation coefficient denoted by $\phi$) over time:
 
 \begin{equation}
 \begin{aligned}
@@ -35,30 +35,46 @@ v_y &= \phi v_{y-1} + \varepsilon_y \\
 (\#eq:residuals)
 \end{equation}
 
-where $\varepsilon_y$ reflects the portion of the survival anomaly $v_y$ that is temporally independent (white noise).
-The first seven years of observed returns that were not linked to observations of spawner abundance in the spawner-recruitment relationship (eqn. \@ref(eq:ricker)) were modeled as random draws from a log-normal distribution with mean $\ln(R_0)$ and variance $\sigma_R^2$.
+where $\varepsilon_y$ reflects the portion of the recruitment anomaly $v_y$ that is temporally independent (i.e., white noise).
+The first seven years of recruitment states were not linked to observations of spawner abundance in the spawner-recruitment relationship (eqn. \@ref(eq:ricker)) and were modeled as random draws from a log-normal distribution with mean $\ln(R_0)$ and variance $\sigma_R^2$.
 Rather than estimating $\ln(R_0)$) as a free parameter as in @fleischman-etal-2013, we choose to follow @staton-etal-2020 and inform its value using the expected recruitment under equilibrium unfished conditions $\ln(\alpha)/\beta$ to enable more consistent comparisons between the two approaches we used.
-The number of Chinook salmon that returned to spawn in year $y$ and age $a$ ($a \in$ 4:7) was the product of the total return in year $y-a$ and the proportion of fish from brood year $y-a$ that returned at age $a$:
+The number of Chinook salmon that returned to spawn in year $y$ at age $a$ ($a \in$ 4:7) was the product of the total recruitment produced by spawning that occurred in brood year $y-a$ and the proportion from brood year $y-a$ that returned at age $a$:
 
 \begin{equation}
-N_{y,a} = R_{y-a,a} p_{y-a,a}
+N_{y,a} = R_{y-a} p_{y-a,a}
 (\#eq:apportion-R)
 \end{equation}
 
-where $p_{y,a}$ is the probability a fish spawned in brood year $y$ will mature at age $a$.
-We modeled brood year variation in maturity schedules as Dirichlet random vectors drawn form a common hyperdistribution characterized by a mean maturation-at-age probability vector ($\boldsymbol{\pi}$) and an inverse dispersion parameter ($D$):
+where $p_{y,a}$ is the probability that a fish spawned in brood year $y$ will mature at age $a$.
+We modeled among brood year variation in maturity schedules as Dirichlet random vectors drawn form a common hyperdistribution characterized by a mean maturation-at-age probability vector ($\boldsymbol{\pi}$) and an inverse dispersion parameter ($D$):
 
 \begin{equation}
 p_{y,a} \stackrel{\mathrm{iid}}{\sim} \mathcal{D}(\boldsymbol{\pi}D)
 (\#eq:dirichlet)
 \end{equation}
 
-Lastly, harvest in a given year ($H$) was modeled as the product of total run size and the harvest rate ($U$) experienced:
+Following @fleischman-etal-2013, we implemented the Dirichlet distribution as a mixture of several gamma distributions (see JAGS code, below). The total run in year $y$ was made up of recruitments from multiple brood years as shown in eqn. \@ref(eq:apportion-R) and was calculated as the sum of the age-specific run abundances:
+
+\begin{equation}
+N_{y} = \sum_{a=4}^{7} N_{y,a}
+(\#eq:get-N-tot)
+\end{equation}
+
+Harvest in a given year ($H_y$) was modeled as the product of total run size and the harvest rate ($U_y$) experienced that year:
 
 \begin{equation}
 H_y = N_y U_y
 (\#eq:harvest)
 \end{equation}
+
+and spawner abundance ($S_y$) was modeled as the portion of $N_y$ remaining after harvest $H_y$:
+
+\begin{equation}
+S_y = N_y (1 - U_y)
+(\#eq:get-S)
+\end{equation}
+
+It is this spawner abundance $S_y$ (which is itself made up of fish of multiple ages from multiple brood years) that is used in eqn.\@ref(eq:ricker) to produce the recruitment abundance produced by spawning in brood year $y$.
 
 ### Observation model
 
