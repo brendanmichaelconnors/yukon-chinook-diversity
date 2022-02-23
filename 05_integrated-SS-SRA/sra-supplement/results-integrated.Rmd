@@ -748,10 +748,9 @@ legend("topright", legend = names(post_list), pch = 22, col = cols$solid, pt.bg 
 
 ```
 
-
 #### Recruitment Variability
 
-*The integrated model suggested **much** higher variability in recruitment than the separated model. When this model was applied to Kuskokwim River Chinook salmon, @staton-etal-2020 also found abnormally high estimates of recruitment variability. Recall that observation variability has supposedly been partitioned away from these estimates. Also, note that lognormal standard deviations less than \~0.6 are approximately equal to coefficients of variation of the natural scale random variables, per eqn.* \@ref(eq:get-sigma)*.* *For example, a standard deviation of 0.5 is a CV of 53%, but a standard deviation of 0.8 is a CV of 95%. Estimates from the separate model approach are more on the scale of what we expect.*
+*The integrated model suggested **much** higher variability in recruitment than the separated model. When this model was applied to Kuskokwim River Chinook salmon, @staton-etal-2020 also found abnormally high estimates of recruitment variability. Recall that observation variability has supposedly been partitioned away from these estimates. Also, note that lognormal standard deviations less than \~0.6 are approximately equal to coefficients of variation of the natural scale random variables, per eqn.* [S8](#eq-get-sigma)*. *For example, a standard deviation of 0.5 is a CV of 53%, but a standard deviation of 0.8 is a CV of 95%. Estimates from the separate model approach are more on the scale of what we expect.*
 
 ```{r, fig.width = 6, fig.height = 4}
 my_par(mar = c(5,3,1,1))
