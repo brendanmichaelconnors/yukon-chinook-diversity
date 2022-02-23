@@ -14,9 +14,9 @@ Rather than fitting eight population-specific models as we describe above, @stat
 
 The integrated approach we used had the following features that differed from those in the separated approach:
 
-1.  A dimension $j$ is added to nearly all quantities. E.g., $N_{y,a}$ from eqn. \@ref(eq:apportion-R) becomes $N_{y,a,j}$, and can be summed to obtain the aggregate run returning in year $y$ by $N_y =\sum_j\sum_aN_{y,a,j}$.
+1.  A dimension $j$ is added to nearly all quantities. E.g., $N_{y,a}$ from eqn. [S3](#apportion-R) becomes $N_{y,a,j}$, and can be summed to obtain the aggregate run returning in year $y$ by $N_y =\sum_j\sum_aN_{y,a,j}$.
 
-2.  The $\varepsilon_y$ term from eqn. \@ref(eq:residuals) becomes $\varepsilon_{y,j}$ and is modeled as a multivariate normal vector within a brood year:
+2.  The $\varepsilon_y$ term from eqn. [S2](#eq-residuals) becomes $\varepsilon_{y,j}$ and is modeled as a multivariate normal vector within a brood year:
 
     \begin{equation}
     \boldsymbol{\varepsilon}_{y} \sim \mathcal{MVN}\left(\mathbf{0}, \Sigma_R\right)
