@@ -426,7 +426,7 @@ compare_ts(post_list = post_list, param = "C_tot", years = years, obs = obs$C_to
 
 ##### Age Composition {.tabset .tabset-pills}
 
-Empty circles represent years in which only the age composition of the aggregate run was available and filled circles represent years in which population-specific samples were available from genetic stock identification. The separated approach did not acknowledge the distinction except for with sample size, whereas the integrated model more explicitly captured this sampling structure. See the \@ref(alt-ssm-description) section for more details.
+Empty circles represent years in which only the age composition of the aggregate run was available and filled circles represent years in which population-specific samples were available from genetic stock identification. The separated approach did not acknowledge the distinction except for with sample size, whereas the integrated model more explicitly captured this sampling structure. See the [Alternative Method: Mixed-Population Model](#alt-ssm) for more details.
 
 *Because a less informative likelihood was used in the early years for the integrated model, the posteriors here are more variable and uncertain around the data than under the separated approach. Despite this, both approaches followed the data, as shown in the general increasing trend in age 4 and age 5 composition and decreasing trend in age 6 and age 7 composition that is captured by both approaches.*
 
@@ -751,7 +751,7 @@ legend("topright", legend = names(post_list), pch = 22, col = cols$solid, pt.bg 
 
 #### Recruitment Variability
 
-*The integrated model suggested **much** higher variability in recruitment than the separated model. When this model was applied to Kuskokwim River Chinook salmon, \@staton-etal-2020 also found abnormally high estimates of recruitment variability. Recall that observation variability has supposedly been partitioned away from these estimates. Also, note that lognormal standard deviations less than \~0.6 are approximately equal to coefficients of variation of the natural scale random variables, per eqn.* \@ref(eq:get-sigma)*.* *For example, a standard deviation of 0.5 is a CV of 53%, but a standard deviation of 0.8 is a CV of 95%. Estimates from the separate model approach are more on the scale of what we expect.*
+*The integrated model suggested **much** higher variability in recruitment than the separated model. When this model was applied to Kuskokwim River Chinook salmon, @staton-etal-2020 also found abnormally high estimates of recruitment variability. Recall that observation variability has supposedly been partitioned away from these estimates. Also, note that lognormal standard deviations less than \~0.6 are approximately equal to coefficients of variation of the natural scale random variables, per eqn.* \@ref(eq:get-sigma)*.* *For example, a standard deviation of 0.5 is a CV of 53%, but a standard deviation of 0.8 is a CV of 95%. Estimates from the separate model approach are more on the scale of what we expect.*
 
 ```{r, fig.width = 6, fig.height = 4}
 my_par(mar = c(5,3,1,1))

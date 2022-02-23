@@ -1,6 +1,6 @@
 ---
 title: "Chinook population diversity contributes to fishery stability and trade-offs with mixed-stock harvest in the Yukon River"
-subtitle: "Appendix S2"
+subtitle: "Ecological Applications /n Appendix S2"
 author: "B.M. Connors, M. R. Siegle, J. Harding, S. Rossi, B.A. Staton, M.L. Jones, M. Bradford, R. Browne, B. Bechtol, B. Doherty, S. Cox"
 output: 
   bookdown::html_document2:
@@ -32,7 +32,7 @@ my_par = function(mar = c(3,3,1,1), mgp = c(2,0.35,0), tcl = -0.15, ljoin = "mit
 }
 ```
 
-This supplement provides a detailed description of the spawner-recruitment models that are briefly described in the main text and which were used to quantify Canadian origin Yukon Chinook population diversity (e.g., population specific spawner abundance, recruitment, productivity, capacity, covariation in survival, etc.) and resulting portfolio effects and mixed-stock fishery trade-offs. 
+This appendix provides a detailed description of the spawner-recruitment models that are briefly described in the main text and which were used to quantify Canadian origin Yukon Chinook population diversity (e.g., population specific spawner abundance, recruitment, productivity, capacity, covariation in survival, etc.) and resulting portfolio effects and mixed-stock fishery trade-offs. 
 
 # Primary Spawner-Recruitment Analysis: Population-Specific Models
 
