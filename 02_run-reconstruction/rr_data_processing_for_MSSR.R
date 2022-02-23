@@ -140,6 +140,8 @@ age_data[,3:6] <- rbind(x_tas_obs_agg,
 
 age_data[,7] <- rowSums(age_data[,3:6])
 
+age_data[,2] <- rep(1985:2019,times=9)
+
 write_csv(age_data,"./05_integrated-SS-SRA/fit-integrated-model/inputs/age-data.csv")  
 
 
