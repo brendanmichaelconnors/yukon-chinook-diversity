@@ -22,7 +22,7 @@ Recruitment abundances of adult Chinook (i.e., the total number of adults from a
 <a id="eq-ricker"></a>
 \begin{equation}
 \ln(R_y) = \ln(S_y) + \ln(\alpha) - \beta S_y + v_y
-\tag{S1}
+\tag{Eqn. S1}
 \end{equation}
 
 where $\alpha$ is productivity (intrinsic rate of growth), $\beta$ is the magnitude of within brood year density-dependent effects and $v_y$ reflects inter-annual variation in survival from egg to adulthood, which we term "recruitment anomalies".
@@ -34,7 +34,7 @@ This variation was assumed to follow a lag-1 autoregressive process (correlation
 v_y &= \phi v_{y-1} + \varepsilon_y \\
 \varepsilon_y &\sim \mathcal{N}(0, \sigma_R)
 \end{aligned}
-\tag{S2}
+\tag{Eqn. S2}
 \end{equation}
 
 where $\varepsilon_y$ reflects the portion of the recruitment anomaly $v_y$ that is temporally independent (i.e., white noise).
@@ -45,7 +45,7 @@ The number of Chinook salmon that returned to spawn in year $y$ at age $a$ ($a \
 <a id="eq-apportion-R"></a>
 \begin{equation}
 N_{y,a} = R_{y-a} p_{y-a,a}
-\tag{S3}
+\tag{Eqn. S3}
 \end{equation}
 
 where $p_{y,a}$ is the probability that a fish spawned in brood year $y$ will mature at age $a$.
@@ -54,7 +54,7 @@ We modeled among brood year variation in maturity schedules as Dirichlet random 
 <a id="eq-dirichlet"></a>
 \begin{equation}
 p_{y,a} \stackrel{\mathrm{iid}}{\sim} \mathcal{D}(\boldsymbol{\pi}D)
-\tag{S4}
+\tag{Eqn. S4}
 \end{equation}
 
 Following @fleischman-etal-2013, we implemented the Dirichlet distribution as a mixture of several gamma distributions (see JAGS code, below). The total run in year $y$ was made up of recruitments from multiple brood years as shown in eqn. [S3](#eq-apportion-R) and was calculated as the sum of the age-specific run abundances:
@@ -62,7 +62,7 @@ Following @fleischman-etal-2013, we implemented the Dirichlet distribution as a 
 <a id="eq-get-N-tot"></a>
 \begin{equation}
 N_{y} = \sum_{a=4}^{7} N_{y,a}
-\tag{S5}
+\tag{Eqn. S5}
 \end{equation}
 
 Harvest in a given year ($H_y$) was modeled as the product of total run size and the harvest rate ($U_y$) experienced that year:
@@ -70,7 +70,7 @@ Harvest in a given year ($H_y$) was modeled as the product of total run size and
 <a id="eq-harvest"></a>
 \begin{equation}
 H_y = N_y U_y
-\tag{S6}
+\tag{Eqn. S6}
 \end{equation}
 
 and spawner abundance ($S_y$) was modeled as the portion of $N_y$ remaining after harvest $H_y$:
@@ -78,7 +78,7 @@ and spawner abundance ($S_y$) was modeled as the portion of $N_y$ remaining afte
 <a id="eq-get-S"></a>
 \begin{equation}
 S_y = N_y (1 - U_y)
-\tag{S7}
+\tag{Eqn. S7}
 \end{equation}
 
 It is this spawner abundance $S_y$ (which is itself made up of fish of multiple ages from multiple brood years) that is used in eqn.[S1](#eq-ricker) to produce the recruitment abundance produced by spawning in brood year $y$.
@@ -91,7 +91,7 @@ Observed spawner abundance was therefore assumed to be log-normally distributed 
 <a id="eq-get-sigma"></a>
 \begin{equation}
 \sigma^2_{o,y} = \ln\left(\mathrm{CV}_y^2 + 1\right)
-\tag{S8}
+\tag{Eqn. S8}
 \end{equation}
 
 We assumed that harvest had a 15% CV and so harvest observations were log-normally distributed with the CV converted to log-normal variance as per eqn.

@@ -489,7 +489,7 @@ The equilibrium calculation for population-specific escapement ($S_{\mathrm{eq},
 <a id="eq-get-Seq"></a>
 \begin{equation}
 S_{\mathrm{eq},j} = S_{\mathrm{MSY},j} \frac{U_{\mathrm{MSY},j} - \ln\left(\frac{1 - U_{\mathrm{MSY},j}}{1 - U_{\mathrm{eq}}}\right)}{U_{\mathrm{MSY},j}}
-\tag{S10}
+\tag{Eqn. S10}
 \end{equation}
 
 and for equilibrium harvest ($H_{\mathrm{eq},j}$):
@@ -497,7 +497,7 @@ and for equilibrium harvest ($H_{\mathrm{eq},j}$):
 <a id="eq-get-S-eq"></a>
 \begin{equation}
 H_{\mathrm{eq},j} = \frac{U_{\mathrm{eq}}S_{\mathrm{eq},j}}{1 - U_{\mathrm{eq}}}
-\tag{S11}
+\tag{Eqn. S11}
 \end{equation}
 
 To build the trade-off relationships, we varied the equilibrium exploitation rate, performed the calculations on each population, and then summarized quantities across populations, e.g., summing population-specific harvest to obtain an estimate of aggregate harvest. This is an effective way to estimate the escapement ($S_{\mathrm{MSY}}$) or exploitation rate ($U_{\mathrm{MSY}}$) at maximum sustained yield from the aggregate population. Contrary to what one might expect, these quantities are not the simple summation or average of the individual population-specific quantities ($S_{\mathrm{MSY},j}$ and $U_{\mathrm{MSY},j}$). Instead, the shape of the trade-off relationships depends on the relationship between productivity and population size.
