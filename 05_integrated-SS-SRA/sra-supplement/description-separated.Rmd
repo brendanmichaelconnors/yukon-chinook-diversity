@@ -48,8 +48,8 @@ N_{y,a} = R_{y-a} p_{y-a,a}
 \tag{Eqn. S3}
 \end{equation}
 
-where $p_{y,a}$ is the probability that a fish spawned in brood year $y$ will mature at age $a$.
-We modeled among brood year variation in maturity schedules as Dirichlet random vectors drawn form a common hyperdistribution characterized by a mean maturation-at-age probability vector ($\boldsymbol{\pi}$) and an inverse dispersion parameter ($D$):
+where $p_{y,a}$ is the probability that a fish spawned in brood year $y$ will return at age $a$.Because we lacked empirical data on life stage-specific abundances (e.g., smolts, fish abundance of different ages/brood years in the ocean) from which to directly estimate maturation rates and life-stage specific mortality, the sole purpose of this probability of return-at-age model (eqn. [S1](#eq-apportion-R)-[S1](#eq-dirichle)) is to apportion the abundance of total adult recruitment to the correct age and year of return
+We modeled among brood year variation in age-at-return as Dirichlet random vectors drawn form a common hyperdistribution characterized by a mean age-at-return probability vector ($\boldsymbol{\pi}$) and an inverse dispersion parameter ($D$):
 
 <a id="eq-dirichlet"></a>
 \begin{equation}
