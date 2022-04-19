@@ -30,7 +30,7 @@ The integrated approach we used had the following features that differed from th
 
 6.  In years where the age composition was sampled for the aggregate population, it was fitted on this basis. That is, in the early years of the times series, the proportion of the aggregate run in year $y$ that was age $a$ was used as the expected frequency when fitting to scale samples that were not assignable using genetic stock identification. In this case, a single multinomial likelihood was used each year. When age composition data were attributable to individual populations, they were then fitted on the population-specific basis, with 8 independent multinomial likelihoods each year.
 
-7.  All maturity parameters were shared among populations within an age and brood year. The separated approach estimates different maturity parameters for each population.
+7.  All age-at-return parameters were shared among populations within an age and brood year. The separated approach estimates different age-at-return parameters for each population.
 
 ### JAGS Model Code
 

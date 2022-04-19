@@ -480,7 +480,7 @@ lines(mean_resid ~ brood_years, lwd = 3, col = cols$solid)
 
 These relationships are posterior summaries of the aggregate population (the total of all 8 populations) under specific equilibrium conditions:
 
-1.  There is no recruitment or maturation process variability (all $v_{y,j}$ are 0)
+1.  There is no recruitment or age-at-return process variability (all $v_{y,j}$ are 0)
 2.  All populations are fished at equal exploitation rates.
 3.  The same exploitation rate is used year after year.
 
