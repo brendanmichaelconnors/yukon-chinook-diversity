@@ -25,7 +25,7 @@ Recruitment abundances of adult Chinook (i.e., the total number of adults from a
 \tag{Eqn. S1}
 \end{equation}
 
-where $\alpha$ is productivity (intrinsic rate of growth), $\beta$ is the magnitude of within brood year density-dependent effects and $v_y$ reflects inter-annual variation in survival from egg to adulthood, which we term "recruitment anomalies".
+where $\alpha$ is productivity (intrinsic rate of growth), $\beta$ is the magnitude of within brood year density-dependent effects, and $v_y$ reflects inter-annual variation in survival from egg to adulthood, which we term "recruitment anomalies".
 This variation was assumed to follow a lag-1 autoregressive process (correlation coefficient denoted by $\phi$) over time:
 
 <a id="eq-residuals"></a>
@@ -39,7 +39,7 @@ v_y &= \phi v_{y-1} + \varepsilon_y \\
 
 where $\varepsilon_y$ reflects the portion of the recruitment anomaly $v_y$ that is temporally independent (i.e., white noise).
 The first seven years of recruitment states were not linked to observations of spawner abundance in the spawner-recruitment relationship (eqn. [S1](#eq-ricker)) and were modeled as random draws from a log-normal distribution with mean $\ln(R_0)$ and variance $\sigma_R^2$.
-Rather than estimating $\ln(R_0)$) as a free parameter as in @fleischman-etal-2013, we choose to follow @staton-etal-2020 and inform its value using the expected recruitment under equilibrium unfished conditions $\ln(\alpha)/\beta$ to enable more consistent comparisons between the two approaches we used.
+Rather than estimating $\ln(R_0)$ as a free parameter as in @fleischman-etal-2013, we choose to follow @staton-etal-2020 and inform its value using the expected recruitment under equilibrium unfished conditions $\ln(\alpha)/\beta$ to enable more consistent comparisons between the two approaches we used.
 The number of Chinook salmon that returned to spawn in year $y$ at age $a$ ($a \in$ 4:7) was the product of the total recruitment produced by spawning that occurred in brood year $y-a$ and the proportion from brood year $y-a$ that returned at age $a$:
 
 <a id="eq-apportion-R"></a>
@@ -48,8 +48,8 @@ N_{y,a} = R_{y-a} p_{y-a,a}
 \tag{Eqn. S3}
 \end{equation}
 
-where $p_{y,a}$ is the probability that a fish spawned in brood year $y$ will return at age $a$.Because we lacked empirical data on life stage-specific abundances (e.g., smolts, fish abundance of different ages/brood years in the ocean) from which to directly estimate maturation rates and life-stage specific mortality, the sole purpose of this probability of return-at-age model (eqn. [S3](#eq-apportion-R)-[S4](#eq-dirichlet)) is to apportion the abundance of total adult recruitment to the correct age and year of return
-We modeled among brood year variation in age-at-return as Dirichlet random vectors drawn form a common hyperdistribution characterized by a mean age-at-return probability vector ($\boldsymbol{\pi}$) and an inverse dispersion parameter ($D$):
+where $p_{y,a}$ is the probability that a fish spawned in brood year $y$ will return at age $a$. Because we lacked empirical data on life stage-specific abundances (e.g., smolts, fish abundance of different ages/brood years in the ocean) from which to directly estimate maturation rates and life-stage specific mortality, the sole purpose of this probability of return-at-age model (eqn. [S3](#eq-apportion-R)-[S4](#eq-dirichlet)) is to apportion the abundance of total adult recruitment to the correct age and year of return.
+We modeled this among brood year variation in age-at-return as Dirichlet random vectors drawn form a common hyperdistribution characterized by a mean age-at-return probability vector ($\boldsymbol{\pi}$) and an inverse dispersion parameter ($D$):
 
 <a id="eq-dirichlet"></a>
 \begin{equation}

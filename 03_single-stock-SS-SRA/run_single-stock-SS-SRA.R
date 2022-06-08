@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------------- #
 # run_single-stock-SS-SRA.R
 #
-# fit single stock state-space spawner-recruitment models
+# Fit single stock state-space spawner-recruitment models
 # ------------------------------------------------------------------------------------- #
 input_data <- readRDS("./02_run-reconstruction/rr_outputs/Yukon_data_for_SS_SRA.RDS")
 age_and_harvest <- read.csv("./01_inputs/data/jtc_age_and_harvest_data.csv")
