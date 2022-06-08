@@ -1,7 +1,7 @@
 #-----------------------------------------------------------------------------#
 # plot.R
 #
-# Plots for Yukon River Chinook run reconstruction
+# Plotting functions for Yukon River Chinook run reconstruction
 #-----------------------------------------------------------------------------#
 
 plotAll <- function( rpt, folder="." )
@@ -118,8 +118,8 @@ plotFitI <- function( rpt, folder="." )
 }
 
 plotFitMulti <- function( rptFiles=c("./rr_outputs/rpt.base.Rdata",
-                                         "./rr_outputs/rpt.oneCor.Rdata",
-                                         "./rr_outputs/rpt.fullCor.Rdata") )
+                                      "./rr_outputs/rpt.oneCor.Rdata",
+                                      "./rr_outputs/rpt.fullCor.Rdata") )
 {
   load(rptFiles[1])
   cols <- c("blue","red","green")
@@ -133,7 +133,7 @@ plotFitMulti <- function( rptFiles=c("./rr_outputs/rpt.base.Rdata",
   z <- 0
   for( g in 1:rpt$nG )
   {
-    jpeg( file=paste("./rr_outputs/indexFitsg",g,".jpeg",sep=""),
+    jpeg( file=paste("./rr_outputs/multiIndexFitsg",g,".jpeg",sep=""),
           height=hei[g], width=wid[g],
          units="in",res=400,bg = "transparent" )
     par( mfrow=dims[[g]], mar=c(2,2,1,1), oma=c(2,3,0,0) )
@@ -226,7 +226,7 @@ plotTotalRunSizeMulti <- function( rptFiles=c("mod1test2/rpt.Rdata",
 {
   load(rptFiles[1])
 
-  pdf( file="totalRunSize.pdf", height=5, width=7 )
+  pdf( file="multiTotalRunSize.pdf", height=5, width=7 )
 
   cols <- brewer.pal(9,"Blues")[c(4,5,7)]
 
@@ -416,7 +416,7 @@ plotRunSizeMulti <- function( rptFiles=c("./rr_outputs/rpt.base.Rdata",
 
   jtr <- c(-0.2,0,0.2)
 
-  jpeg("./rr_outputs/figureS6.jpeg", width = 7, height = 8, units = "in", res = 600)
+  jpeg("./rr_outputs/figureS9.jpeg", width = 7, height = 8, units = "in", res = 600)
   par( mfrow=c(8,1), mar=c(0,2,0,1), oma=c(2,3,2,2) )
 
   for( s in 1:rpt$nS )
@@ -843,7 +843,7 @@ plotDevSD <- function()
     upp_is[i, ] <- sdrpt$uCI
   }
   x <- 1:8
-  jpeg("./rr_outputs/FigureS7.jpeg", height=4, width=6, units="in",res=400,bg = "transparent")
+  jpeg("./rr_outputs/FigureS8.jpeg", height=4, width=6, units="in",res=400,bg = "transparent")
   par( mar=c(5,6,1,1) )
   plot( x=c(0,9), y=c(min(low_is)*0.95,max(upp_is)*1.05), xaxs="i",
         type="n", yaxs="i", axes=FALSE,

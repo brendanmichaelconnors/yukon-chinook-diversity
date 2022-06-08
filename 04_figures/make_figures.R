@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------------- #
 # make_figures.R
 #
-# Manuscript figures
+# Generate manuscript figures
 # ------------------------------------------------------------------------------------- #
 
 # load data/outputs ----
@@ -31,9 +31,6 @@ ensemble <- ensemble %>%
                                 stock == "Teslin" ~ "Teslin",
                                 stock == "MiddleMainstem" ~ "Middle Mainstem",
                                 stock == "UpperLakesAndMainstem" ~ "Upper Lakes and Mainstem")) %>%
-  select(population, year, lwr_2.5: upr_97.5)
-
-ensemble <- ensemble %>%
   mutate(Color = case_when(population == "Lower Mainstem" ~ "#440154FF",
                            population == "Stewart" ~ "#46337EFF",
                            population == "Pelly" ~ "#365C8DFF",
@@ -41,14 +38,15 @@ ensemble <- ensemble %>%
                            population == "Middle Mainstem" ~ "#1FA187FF",
                            population == "Carmacks" ~ "#4AC16DFF",
                            population == "Upper Lakes and Mainstem" ~ "#9FDA3AFF",
-                           population == "Teslin" ~ "#FDE725FF"))
+                           population == "Teslin" ~ "#FDE725FF")) %>%
+  select(population, year, lwr_2.5: upr_97.5)
 
 ensemble[,3:7] <- ensemble[,3:7]/1000
 
 ensemble$pops_f <- factor(ensemble$population, levels = c("Lower Mainstem", "White-Donjek", "Stewart", "Pelly", "Middle Mainstem", "Carmacks", "Upper Lakes and Mainstem", "Teslin"))
 
 # posterior wrangling
-colnames(SSSR) <- pop
+colnames(SSSR) <- pop # add hard coded parameter names, ugly but gets job done
 
 population <- rep(c("Lower Mainstem",
                     "White-Donjek",
@@ -59,16 +57,16 @@ population <- rep(c("Lower Mainstem",
                     "Middle Mainstem",
                     "Upper Lakes and Mainstem"),each=10000)
 
-Post.YlC <- as.data.frame(SSSR[1:10000,1:562,1])
-Post.YS <- as.data.frame(SSSR[1:10000,1:562,2])
+Post.Yl <- as.data.frame(SSSR[1:10000,1:562,1])
+Post.YWD <- as.data.frame(SSSR[1:10000,1:562,2])
 Post.YP <- as.data.frame(SSSR[1:10000,1:562,3])
-Post.YWD <- as.data.frame(SSSR[1:10000,1:562,4])
-Post.Ym <- as.data.frame(SSSR[1:10000,1:562,5])
-Post.YC <- as.data.frame(SSSR[1:10000,1:562,6])
-Post.Yu <- as.data.frame(SSSR[1:10000,1:562,7])
-Post.YT <- as.data.frame(SSSR[1:10000,1:562,8])
+Post.YS <- as.data.frame(SSSR[1:10000,1:562,4])
+Post.YC <- as.data.frame(SSSR[1:10000,1:562,5])
+Post.YT <- as.data.frame(SSSR[1:10000,1:562,6])
+Post.Ym <- as.data.frame(SSSR[1:10000,1:562,7])
+Post.Yu <- as.data.frame(SSSR[1:10000,1:562,8])
 
-Posteriors <- do.call("rbind",list(Post.YlC,Post.YS,Post.YP,Post.YWD,Post.Ym,Post.YC,Post.Yu,Post.YT)) 
+Posteriors <- do.call("rbind",list(Post.Yl,Post.YWD,Post.YP,Post.YS,Post.YC,Post.YT,Post.Ym,Post.Yu)) 
 Posteriors.df <- cbind(population,Posteriors)
 
 # combine alpha and beta population dataframes
@@ -92,10 +90,9 @@ alpha_beta_per <- Posteriors.df %>%
                    U.msy = quantile(U.msy, probs=0.5)) %>%
   as.data.frame()
 
-# create resid dataframe
+# create recruitment residuals dataframe
 logresid_df <- Posteriors.df[,c(1,47:84)] %>%
   group_by(population) %>%
-  sample_n(1000,replace=TRUE) %>%
   select(1,2,13,24,34:39,3:12,14:23,25:33) %>%
   as.data.frame()
 
@@ -137,9 +134,9 @@ logresid_perc_scale <- logresid_df %>%
 # create spawner dataframe
 spawn_df <- Posteriors.df[,c(1,492:526)] %>%
   group_by(population) %>%
-  sample_n(10000,replace=TRUE) %>%
   as.data.frame()
 
+#re-order posteriors to be in correct order
 spawn_df2 <- spawn_df[,c(1,2,13,24,31:36,3:12,14:23,25:30)]
 
 spawn <- spawn_df2 %>%
@@ -156,9 +153,9 @@ spawn <- spawn_df2 %>%
 # create recruit dataframe
 rec_df <- Posteriors.df[,c(1,453:490)] %>%
   group_by(population) %>%
-  sample_n(1000,replace=TRUE) %>%
   as.data.frame()
 
+#re-order posteriors to be in correct order
 rec_df2 <- rec_df[,c(1,2,13,24,34:39,3:12,14:23,25:33)]
 
 recruit <- rec_df2 %>%
@@ -178,7 +175,6 @@ alphabeta_df <-  Posteriors.df %>%
   mutate(equilibrium = log(alpha)/beta,
          alpha = alpha) %>%
   group_by(population) %>%
-  sample_n(1000,replace=TRUE) %>%
   as.data.frame()
 
 
@@ -189,28 +185,28 @@ alphabeta_df2_summ <- alphabeta_df %>%
             max = max(equilibrium)) %>%
   as.data.frame()
 
-# create vector of abundances for each dataframe
-sp_YC <- as.vector(seq(0,20,length.out=1000))
-sp_YlC <- as.vector(seq(0,20,length.out=1000))
-sp_Ym <- as.vector(seq(0,40,length.out=1000))
-sp_YP <- as.vector(seq(0,25,length.out=1000))
+# create vector of abundances for each dataframe spawning range (in 1000s) you want to predict SR relationship over
+sp_Yl <- as.vector(seq(0,20,length.out=1000))
+sp_YWD <- as.vector(seq(0,14,length.out=1000))
+sp_YP <- as.vector(seq(0,20,length.out=1000))
 sp_YS <- as.vector(seq(0,25,length.out=1000))
-sp_YT <- as.vector(seq(0,25,length.out=1000))
-sp_Yu <- as.vector(seq(0,20,length.out=1000))
-sp_YWD <- as.vector(seq(0,13,length.out=1000))
+sp_YC <- as.vector(seq(0,20,length.out=1000))
+sp_YT <- as.vector(seq(0,20,length.out=1000))
+sp_Ym <- as.vector(seq(0,40,length.out=1000))
+sp_Yu <- as.vector(seq(0,19,length.out=1000))
 
 # repeat substock abundance vector 1000 times for each value of alpha and beta
-spw_YC <- rep(c(sp_YC),(1000))
-spw_YlC <- rep(c(sp_YlC),(1000))
-spw_Ym <- rep(c(sp_Ym),(1000))
+spw_Yl <- rep(c(sp_Yl),(1000))
+spw_YWD <- rep(c(sp_YWD),(1000))
 spw_YP <- rep(c(sp_YP),(1000))
 spw_YS <- rep(c(sp_YS),(1000))
+spw_YC <- rep(c(sp_YC),(1000))
 spw_YT <- rep(c(sp_YT),(1000)) 
+spw_Ym <- rep(c(sp_Ym),(1000))
 spw_Yu <- rep(c(sp_Yu),(1000))
-spw_YWD <- rep(c(sp_YWD),(1000))
 
-# combine abundances into single vector
-spw_df <- c(spw_YC,spw_YlC,spw_Ym,spw_YP,spw_YS,spw_YT,spw_Yu,spw_YWD)
+# combine abundances into single vector, but make sure it is right order
+spw_df <- c(spw_YC,spw_Yl,spw_Ym,spw_YP,spw_YS,spw_YT,spw_Yu,spw_YWD)
 
 # repeat each alpha beta row 1000x
 alphabeta_df3 <- alphabeta_df[rep(seq_len(nrow(alphabeta_df)),each=1000),]
@@ -219,10 +215,9 @@ alphabeta_df3 <- alphabeta_df[rep(seq_len(nrow(alphabeta_df)),each=1000),]
 alphabeta_df3$abund <- NA
 alphabeta_df3$abund <- spw_df
 
-# add on 'y' value that has the predicted ricker estimates per abundance value
+# add on 'y' value that has the predicted recruitment per abundance value
 alphabeta_df3$y <- NA
 alphabeta_df3$y <- alphabeta_df3$alpha*alphabeta_df3$abund*exp(-alphabeta_df3$beta*alphabeta_df3$abund)
-
 
 # add scenario simulation number
 scen <- rep(1:1000, each = 1000)
@@ -275,7 +270,10 @@ RS_df2$population <- factor(RS_df2$population, levels = c("Lower Mainstem","Whit
                                                           "Middle Mainstem",
                                                           "Carmacks","Upper Lakes and Mainstem","Teslin"))
 
-write.csv(RS_df2,"01_inputs/posteriors/brood_table.csv" )
+#write.csv(RS_df2,"01_inputs/posteriors/brood_table.csv" )
+
+source("./04_figures/tradeoffs.R")
+
 
 # Figure 3: multi-panel daily border passage + corr run-timing + annual border passage ----
 
@@ -332,9 +330,10 @@ b <- ggcorrplot(run_corr_2, type = "upper",
 
 # border passage by population 
 c <- ggplot(ensemble, aes(x = as.factor(year), y = med, fill = pops_f)) + 
-  geom_bar(stat = "identity", width=1) +
+          geom_bar(stat = "identity", width=1) +
           scale_fill_manual(values = c("#440154FF", "#277F8EFF","#46337EFF", "#365C8DFF", "#1FA187FF", "#4AC16DFF","#9FDA3AFF", "#FDE725FF")) +
-          geom_errorbar(data=ensemble, aes(x= as.factor(year), ymin= lwr_2.5, ymax=upr_97.5, width=.1)) +
+          geom_errorbar(data=ensemble, aes(x= as.factor(year), ymin= lwr_2.5, ymax=upr_97.5, width=.1,color = pops_f)) +
+          scale_color_manual(values = c("#440154FF", "#277F8EFF","#46337EFF", "#365C8DFF", "#1FA187FF", "#4AC16DFF","#9FDA3AFF", "#FDE725FF")) +
           xlab("Year") +
           ylab("Border passage (000s)") +
           coord_cartesian(ylim = c(0,40))+
@@ -351,19 +350,17 @@ c <- ggplot(ensemble, aes(x = as.factor(year), y = med, fill = pops_f)) +
                 strip.background = element_blank())
 
 # combine three plots
-g <- ggarrange(ggarrange(a,b,nrow =2, labels = c("a", "b")),c,
-               ncol = 2, labels = c("","c"), hjust=0.7)
+g <- ggarrange(ggarrange(a,b,nrow =2, labels = c("a", "b"),
+                         font.label = list(size = 10)),c,
+               ncol = 2, labels = c("","c"), hjust=0.7,
+               font.label = list(size = 10))
 
 jpeg("./04_figures/figures/figure3.jpeg", width = 6, height = 5, units = "in", res = 600)
 print(g)
 dev.off()
 
-# Figure 8: Multi-panel SR and trade-offs
-
-source("./04_figures/tradeoffs.R")
 
 # Figure 4: spawner-recruit ----
-
 a <- ggplot() +
   geom_ribbon(data = alphabeta_df3_perc, aes(x = abund, ymin = q_05, ymax = q_95), 
               fill = "grey80", alpha=0.5, linetype=2, colour="gray46") +
@@ -415,8 +412,6 @@ b <- ggplot(data = alpha_beta_per, aes(x = equil_med, y = alpha_med, fill=popula
                   nudge_y=c(0,0,0,0,0,0,0,0),
                   size=2)
 
-source("./04_figures/tradeoffs.R")
-
 c <- ggplot(t3.3, aes(x=U*100, y=med_V2)) +
   geom_line(linetype = "solid", size=0.5) +
   geom_ribbon(aes(ymin=low_V2, ymax=upp_V2), alpha=0.2, lty=1) +
@@ -431,7 +426,7 @@ c <- ggplot(t3.3, aes(x=U*100, y=med_V2)) +
   xlab("Harvest rate (%)") +
   theme_bw() +
   theme(axis.title = element_text(size= 9),
-        axis.text = element_text(size = 7),
+        axis.text = element_text(size = 6),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         legend.position = "none",
@@ -450,8 +445,8 @@ c <- ggplot(t3.3, aes(x=U*100, y=med_V2)) +
            color="black", 
            size=0.3)
 
-g <- ggarrange(a,ggarrange(b,c,nrow =2, labels = c("b", "c")),
-               ncol = 2, labels = c("a"))
+g <- ggarrange(a,ggarrange(b,c,nrow =2, labels = c("b", "c"),font.label = list(size = 10)),
+               ncol = 2, labels = c("a"), font.label = list(size = 10))
 
 jpeg("./04_figures/figures/figure4.jpeg", width = 6, height = 6, units = "in", res = 600)
 print(g)
@@ -462,7 +457,7 @@ logresid_perc_scale$population <- factor(logresid_perc_scale$population, levels 
                                                                                     "Middle Mainstem",
                                                                                     "Carmacks","Upper Lakes and Mainstem","Teslin"))
 
-a <- ggplot(logresid_perc_scale, aes(x=BroodYear, y = med , color=population), show.legend = F) +
+a <- ggplot(logresid_perc_scale%>%filter(BroodYear<2013), aes(x=BroodYear, y = med , color=population), show.legend = F) +
   geom_point(size=1,show.legend = F) + 
   scale_color_manual(values = pop_colors_ord, name=population) +
   geom_line(show.legend = F) + 
@@ -526,8 +521,8 @@ c <- ggplot(data = phis.long, aes(x = pop, y = phi, fill=pop)) +
         legend.position = "none",
         plot.margin = unit(c(0.25,0.25,0.7,0.5), units = "lines"))
 
-g <- ggarrange(a,ggarrange(b,c,nrow =2, labels = c("b", "c")),
-               ncol = 2, labels = c("a"))
+g <- ggarrange(a,ggarrange(b,c,nrow =2, labels = c("b", "c"),font.label = list(size = 10)),
+               ncol = 2, labels = c("a"),font.label = list(size = 10))
 
 jpeg("./04_figures/figures/figure5.jpeg", width = 6, height = 5, units = "in", res = 600)
 print(g)
@@ -535,24 +530,28 @@ dev.off()
 
 # Figure 6: CV in run-size ----
 
-indCVs <- matrix(NA,1000,8); colnames(indCVs)<-unique(spawn_df$population)
-for (i in unique(spawn_df$population)){
+run_df <- Posteriors.df[,c(1,121:155)] %>%
+  group_by(population) %>%
+  as.data.frame()
+
+indCVs <- matrix(NA,1000,8); colnames(indCVs)<-unique(run_df$population)
+for (i in unique(run_df$population)){
   for(j in 1:1000){
-    pop <- subset(spawn_df, population == i)[sample(1:1000,1),]
+    pop <- subset(run_df, population == i)[sample(1:10000,1),]
     indCVs[j,i] <-sd(as.numeric(pop[-1]))/mean(as.numeric(pop[-1]))
   }
 }
 
 aggCV <- matrix(NA,1000,1)
 for(j in 1:1000){
-  rsamp <- sample(1:1000,1);rsamps<-c(rsamp,rsamp+1000,rsamp+2000,rsamp+3000,
-                                      rsamp+4000,rsamp+5000,rsamp+6000,rsamp+7000)
-  agg<-colSums(spawn_df[rsamps,2:36])
+  rsamp <- sample(1:10000,1);rsamps<-c(rsamp,rsamp+10000,rsamp+20000,rsamp+30000,
+                                      rsamp+40000,rsamp+50000,rsamp+60000,rsamp+70000)
+  agg<-colSums(run_df[rsamps,2:36])
   aggCV[j] <-sd(agg)/mean(agg)
 }
 
 CVs<-cbind(indCVs,aggCV)
-colnames(CVs)<-c(as.character(unique(spawn_df$population)),"Aggregate")
+colnames(CVs)<-c(as.character(unique(run_df$population)),"Aggregate")
 CVs.df <- as.data.frame(CVs)                 
 CV.long <-pivot_longer(data=CVs.df,cols=1:9, names_to = "pop", values_to = "cv")
 CV.long$pop <- factor(CV.long$pop, levels = c("Aggregate","Lower Mainstem","White-Donjek","Stewart","Pelly",
@@ -603,7 +602,7 @@ a <- ggplot(data = CV.long, aes(x = pop, y = cv, fill=pop)) +
   ylim(0,1) +
   scale_fill_manual(values=c("dark grey", pop_colors_ord))+
   theme(axis.title.y = element_blank(),
-        axis.text = element_text(size=7),
+        axis.text = element_text(size=6),
         axis.title.x = element_text(size=9),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
@@ -617,8 +616,8 @@ b <- ggplot(data = rt_cvs, aes(x = Year, y = CV, color=Location)) +
   scale_y_continuous(breaks = c(0,0.15,0.3,0.45,0.6,0.75), limits=c(0,0.85),position = "right") +
   theme_bw() +
   theme(axis.title = element_text(size=9),
-        axis.text.x = element_text(angle=45, hjust = 1, size=7),
-        axis.text.y = element_text(size=7),
+        axis.text.x = element_text(angle=45, hjust = 1, size=6),
+        axis.text.y = element_text(size=6),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         legend.justification = c(0,0),
@@ -629,7 +628,7 @@ b <- ggplot(data = rt_cvs, aes(x = Year, y = CV, color=Location)) +
         legend.title = element_text(size = 8),
         plot.margin = unit(c(0.25,0.25,0,1), units = "lines"))
 
-g <- ggarrange(a,b, labels = c("a", "b"),widths = c(1.3, 1), ncol = 2)
+g <- ggarrange(a,b, labels = c("a", "b"),widths = c(1.3, 1), ncol = 2,font.label = list(size = 10))
 
 jpeg("./04_figures/figures/figure6.jpeg", width = 6, height = 2.5, units = "in", res = 600)
 print(g)
@@ -648,45 +647,6 @@ bc <- border_passage %>%
   filter(year_gear %not_in% c("2005_fishWheel","2006_fishWheel","2007_fishWheel")) %>%
   filter(year %not_in% c("1988","1989","1990","1998")) %>%
   as.data.frame()
-
-gsi.prop <- gsi %>%
-  mutate(year_gear = paste0(year,"_",gear)) %>%
-  filter(year_gear %not_in% c("2008_Fish Wheel","2010_Fish Wheel","2011_Fish Wheel","2012_Fish Wheel")) %>%
-  group_by(year, sample_num) %>%
-  filter(prob == max(prob)) %>%
-  ungroup() %>%
-  group_by(year_gear) %>%
-  mutate(total_count = n()) %>%
-  ungroup() %>%
-  group_by(year_gear, region_name) %>%
-  mutate(pop_count = n(),
-         pop_prop = (pop_count/total_count)*100) %>%
-  ungroup() %>%
-  distinct(year, region_name, pop_prop) %>%
-  spread(key=region_name, pop_prop) %>%
-  as.data.frame()
-
-gsi.count <- gsi %>%
-  mutate(year_gear = paste0(year,"_",gear)) %>%
-  filter(year_gear %not_in% c("2008_Fish Wheel","2010_Fish Wheel","2011_Fish Wheel","2012_Fish Wheel")) %>%
-  group_by(year, sample_num) %>%
-  filter(prob == max(prob)) %>%
-  ungroup() %>%
-  group_by(year_gear) %>%
-  mutate(total_count = n()) %>%
-  ungroup() %>%
-  group_by(year_gear, region_name) %>%
-  mutate(pop_count = n(),
-         pop_prop = (pop_count/total_count)*100) %>%
-  ungroup() %>%
-  distinct(year, region_name, pop_count) %>%
-  spread(key=region_name, pop_count) %>%
-  as.data.frame()
-
-gsi.join <- full_join(gsi.count, gsi.prop) %>% 
-  dplyr::select(1, 3, 6, 5, 9, 4, 2, 8, 7) %>%
-  as.data.frame()
-#write.csv(gsi.join, file = "gsi.count.csv")
 
 gsi %>% 
   group_by(year, sample_num) %>%
@@ -720,17 +680,6 @@ gsi2 <- gsi %>%
   distinct(year, year_count, julian, julian_prop,julian_prop2) %>%
   as.data.frame()
 
-gsi2 %>% distinct(year, gear) %>% arrange(gear, year)
-bc %>% distinct(year, count_type) %>% arrange(count_type, year)
-bc %>% group_by(year) %>% summarise(sum = sum(prop)) %>% as.data.frame()
-gsi2 %>% group_by(year) %>% summarise(sum = sum(julian_prop)) %>% as.data.frame()
-
-a <- gsi2 %>% distinct(year, year_count) %>% arrange(year) %>% 
-  mutate(xpos = 200,
-         ypos = 0,
-         vjustvar = 0) %>%
-  as.data.frame()
-
 g <- ggplot() +
   geom_vline(xintercept=c(180,210,240), color="light grey",lwd=0.25,lty=2) +
   geom_bar(data = bc, aes(x=as.numeric(julian), y=prop2),stat = "identity") +
@@ -754,12 +703,13 @@ g <- ggplot() +
   geom_text(data = a, 
             mapping = aes(x = 237, y = -0.5, label = year_count, hjust = 1, vjust = 2),
             size=3, color = "red")
+
 jpeg("04_figures/figures/figureS1.jpeg", width = 6, height = 8, units = "in", res = 600)
 print(g)
 dev.off()
 
 
-# Figure S11: Age composition ----
+# Figure S12: Age composition ----
 ASL$new_AGE <- as.numeric(ASL$new_AGE)
 
 data <- ASL %>% 
@@ -831,7 +781,7 @@ g <- ggplot(data2, aes(x=year, y=age_prop, fill=Fish.Age)) +
         strip.background = element_blank())
 
 
-jpeg("04_figures/figures/figureS11.jpeg", width = 6, height = 5, units = "in", res = 200)
+jpeg("04_figures/figures/figureS12.jpeg", width = 6, height = 5, units = "in", res = 200)
 print(g)
 dev.off()
 
@@ -864,9 +814,7 @@ late_resids <- logresid_perc_scale %>%
 
 median(-1-(late_resids$`mean(med)`/early_resids$`mean(med)`))
 
-  
 # harvest-risk tradeoffs
-
 t3.3$med_V2[which(t3.3$med_V2==max(t3.3$med_V2))] # median max-mixed stock harvest
 t3.3$low_V2[which(t3.3$low_V2==max(t3.3$low_V2))] # lower CI max-mixed stock harvest
 t3.3$upp_V2[which(t3.3$upp_V2==max(t3.3$upp_V2))] # upper CI max-mixed stock harvest
@@ -879,9 +827,10 @@ t3.3$over.med[which(t3.3$med_V2==max(t3.3$med_V2))] # median overfished at max-m
 t3.3$over.low[which(t3.3$low_V2==max(t3.3$low_V2))] # lower CI overfished at max-mixed stock harvest
 t3.3$over.up[which(t3.3$upp_V2==max(t3.3$upp_V2))] # upper CI overfished at max-mixed stock harvest
 
-t3.3$ext.med[which(t3.3$med_V2==max(t3.3$med_V2))] # median overfished at max-mixed stock harvest 
-t3.3$ext.low[which(t3.3$low_V2==max(t3.3$low_V2))] # lower CI overfished at max-mixed stock harvest
-t3.3$ext[which(t3.3$upp_V2==max(t3.3$upp_V2))] # upper CI overfished at max-mixed stock harvest
+
+t3.3$ext.med[which(t3.3$med_V2==max(t3.3$med_V2))] # median extirpated at max-mixed stock harvest 
+t3.3$ext.low[which(t3.3$low_V2==max(t3.3$low_V2))] # lower CI extirpated at max-mixed stock harvest
+t3.3$ext[which(t3.3$upp_V2==max(t3.3$upp_V2))] # upper CI extirpated at max-mixed stock harvest
 
 # run-size CVs
 colMeans(indCVs)

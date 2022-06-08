@@ -1,7 +1,7 @@
 #-----------------------------------------------------------------------------#
 # calcEnsemble.R        
 #
-# calculate ensemble estimates of border passge through time
+# Calculate ensemble estimates of border passage through time
 #-----------------------------------------------------------------------------#
 
 calcEnsemble <- function( mods=c("rpt.base","rpt.oneCor","rpt.fullCor"),

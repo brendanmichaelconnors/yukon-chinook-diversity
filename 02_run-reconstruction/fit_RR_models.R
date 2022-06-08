@@ -24,7 +24,7 @@ plotAll(rpt = rpt, folder = "./02_run-reconstruction/rr_outputs/fullCor_plots")
 # generate ensemble estimates of border passage
 source("./02_run-reconstruction/calcEnsemble.R")
 
-# Figure S2 - total run-reconstruction fits
+# Figure S2 - total run-reconstruction fits for full cor RR model
 jpeg("./04_figures/figures/figureS2.jpeg", height=4.5, width=7,units="in",res=400,bg = "transparent")
 
 par( mar=c(5,5,1,1) )
@@ -59,11 +59,15 @@ points(x= 29.8, y= 119,col="red",cex=0.8)
 axis(1,b[c(1,6,11,16,21,26,31,35)],labels= c("1985","1990","1995","2000", "2005","2010","2015","2019"))
 dev.off() 
 
+# Figure S3 and S4 - RR model fits to daily counts
+plotFitMulti(rptFiles=c("./rr_outputs/rpt.base.Rdata",
+                        "./rr_outputs/rpt.oneCor.Rdata",
+                        "./rr_outputs/rpt.fullCor.Rdata"))
 
-plotRunSizeMulti()
 
-plotRunSizeMulti <- function( rptFiles=c("./rr_outputs/rpt.base.Rdata",
-                                         "./rr_outputs/rpt.oneCor.Rdata",
-                                         "./rr_outputs/rpt.fullCor.Rdata") )
+# Figure S9 - Run-size by RR model 
+plotRunSizeMulti(rptFiles=c("./rr_outputs/rpt.base.Rdata",
+                            "./rr_outputs/rpt.oneCor.Rdata",
+                            "./rr_outputs/rpt.fullCor.Rdata"))
   
   

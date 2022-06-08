@@ -1,8 +1,8 @@
 #------------------------------------------------------------------------------#
-# rr_data_processing_for_MSSR.R
+# rr_data_processing_for_SRA.R
 #
-# Wrangle run-reconstruction data into format required for multi-stock SS 
-# spawner-recruit modelling
+# Wrangle run-reconstruction data into format required for single- and multi-stock  
+# SS spawner-recruit modelling
 #------------------------------------------------------------------------------#
 
 rr_modAll <- read.csv("./02_run-reconstruction/rr_outputs/ensemble.csv") # ensemble run-reconstruction output

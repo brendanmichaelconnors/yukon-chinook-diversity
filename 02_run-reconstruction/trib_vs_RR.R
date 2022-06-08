@@ -1,8 +1,10 @@
 # ------------------------------------------------------------------------------------- #
 # trib_vs_RR.R
-# comparison of multi-population run-reconstruction estimates of CDN-origin Yukon Chinook 
+# 
+# Comparison of multi-population run-reconstruction estimates of CDN-origin Yukon Chinook 
 # escapement at watershed scale and tributary level indices of escapement for individual assessment 
 # projects
+#---------------------------------------------------------------------------------------#
 
 # load "data", manipulate, merge and standardize
 indices <- read.csv("./02_run-reconstruction/data/DATA_InputFiles_HM_Canadian_Model_Data_2017.csv") # tributary indices from H. Hamazaki for JTC IMEG EG RR
@@ -74,6 +76,10 @@ mean_index <- rr_escInd %>%
 	group_by(tributary) %>%
 	summarize(Mean=mean(index, na.rm = T))
 	
+scale_this <- function(x){
+  (x - mean(x, na.rm=TRUE)) / sd(x, na.rm=TRUE)
+}
+
 mean_index <- mean_index[-12,]	
 mean_index$Mean <- round(mean_index$Mean)
 # standardize the index and escapement estimates
@@ -104,4 +110,4 @@ ggplot(scaled_data, aes(x = scaled_esc, y = scaled_index)) +
   theme(strip.background = element_blank())
 
   
-ggsave("./04_figures/figures/figureS10.jpeg", height = 5, width = 5.5)
+ggsave("./04_figures/figures/figureS11.jpeg", height = 5, width = 5.5)
