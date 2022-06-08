@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/346238990.svg)](https://zenodo.org/badge/latestdoi/346238990)
+
 # yukon-chinook-diversity
 Data and code to reproduce analyses in:
 > Population diversity in Canadian-origin Chinook salmon: portfolio quantification and implications for conservation, harvest, equity, and resilience. In press. Connors B.M., Siegle M.R., Harding J., Rossi S., Staton B., Jones M., Bradford M., Browne R., Bechtol B., Doherty B. and S. Cox. Ecological Applications.
