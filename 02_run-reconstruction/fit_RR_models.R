@@ -60,14 +60,14 @@ axis(1,b[c(1,6,11,16,21,26,31,35)],labels= c("1985","1990","1995","2000", "2005"
 dev.off() 
 
 # Figure S3 and S4 - RR model fits to daily counts
-plotFitMulti(rptFiles=c("./rr_outputs/rpt.base.Rdata",
-                        "./rr_outputs/rpt.oneCor.Rdata",
-                        "./rr_outputs/rpt.fullCor.Rdata"))
+plotFitMulti(rptFiles=c("./02_run-reconstruction/rr_outputs/rpt.base.Rdata",
+                        "./02_run-reconstruction/rr_outputs/rpt.oneCor.Rdata",
+                        "./02_run-reconstruction/rr_outputs/rpt.fullCor.Rdata"))
 
 
 # Figure S9 - Run-size by RR model 
-plotRunSizeMulti(rptFiles=c("./rr_outputs/rpt.base.Rdata",
-                            "./rr_outputs/rpt.oneCor.Rdata",
-                            "./rr_outputs/rpt.fullCor.Rdata"))
+plotRunSizeMulti(rptFiles=c("./02_run-reconstruction/rr_outputs/rpt.base.Rdata",
+                            "./02_run-reconstruction/rr_outputs/rpt.oneCor.Rdata",
+                            "./02_run-reconstruction/rr_outputs/rpt.fullCor.Rdata"))
   
   
