@@ -2,7 +2,7 @@
 
 # yukon-chinook-diversity
 Data and code to reproduce analyses in:
-> Population diversity in Canadian-origin Chinook salmon: portfolio quantification and implications for conservation, harvest, equity, and resilience. In press. Connors B.M., Siegle M.R., Harding J., Rossi S., Staton B., Jones M., Bradford M., Browne R., Bechtol B., Doherty B. and S. Cox. Ecological Applications.
+> Chinook salmon diversity contributes to fishery stability and trade-offs with mixed-stock harvest. 2022. Connors B.M., Siegle M.R., Harding J., Rossi S., Staton B., Jones M., Bradford M., Browne R., Bechtol B., Doherty B. and S. Cox. Ecological Applications.[paper](https://esajournals.onlinelibrary.wiley.com/doi/full/10.1002/eap.2709?utm_sq=gqzx3u0l8q)
 
 This project consists of 3 primary components: 
 1. a state-space run-reconstruction model fitted to daily estimates of total border passage and population composition to estimate annual population-specific border passage and spawner abundance; 
